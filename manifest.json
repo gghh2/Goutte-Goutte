@@ -1,7 +1,7 @@
 {
-  "name": "Réhydratation Enfant - Protocole Picolite",
-  "short_name": "Réhydratation",
-  "description": "Application de suivi de réhydratation pour enfants selon le protocole Picolite",
+  "name": "GoutteÀGoutte - Réhydratation Enfant",
+  "short_name": "GoutteÀGoutte",
+  "description": "Accompagnez la réhydratation de votre enfant goutte à goutte. Application de suivi du protocole Picolite avec timer, rappels et historique complet.",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#667eea",

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rehydratation-v3';
+const CACHE_NAME = 'goutteagoutte-v1';
 const urlsToCache = [
   './',
   './index.html',
