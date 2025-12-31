@@ -1,4 +1,4 @@
-const CACHE_NAME = 'goutteagoutte-v1';
+const CACHE_NAME = 'goutteagoutte-v3';
 const urlsToCache = [
   './',
   './index.html',
