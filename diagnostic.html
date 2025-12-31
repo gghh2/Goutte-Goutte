@@ -161,9 +161,8 @@
             addResult(`📱 Version app: <code>${APP_VERSION}</code>`, 'ok');
             addResult(`🔢 User Agent: <code>${navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}</code>`, 'ok');
             
-            // Check timer function exists
-            const hasStartTimer = typeof window.startTimer === 'function';
-            addResult(`⏱️ Fonction startTimer: ${hasStartTimer ? '✅ Existe' : '❌ Manquante'}`, hasStartTimer ? 'ok' : 'error');
+            // Instructions for timer test
+            addResult(`⏱️ Pour tester le timer: Retournez sur <a href="/" style="color: #667eea; font-weight: 600;">index.html</a> et démarrez un protocole`, 'ok');
         }
         
         async function unregisterServiceWorker() {
