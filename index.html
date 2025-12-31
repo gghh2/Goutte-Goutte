@@ -1,0 +1,3308 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Application de suivi de réhydratation pour enfants selon le protocole Picolite">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- iOS -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Réhydratation">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' fill='%23667eea' rx='40'/%3E%3Ctext x='96' y='140' font-size='100' text-anchor='middle' fill='white'%3E💧%3C/text%3E%3C/svg%3E">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='75' font-size='75'%3E💧%3C/text%3E%3C/svg%3E">
+    
+    <title>Réhydratation Enfant - Protocole Picolite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .menu-button {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 10000;
+            display: none;
+        }
+
+        .menu-overlay.active {
+            display: block;
+        }
+
+        .menu-panel {
+            position: fixed;
+            top: 0;
+            right: -350px;
+            width: 350px;
+            height: 100%;
+            background: white;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.3);
+            transition: right 0.3s ease;
+            z-index: 10001;
+            overflow-y: auto;
+        }
+
+        .menu-panel.active {
+            right: 0;
+        }
+
+        .menu-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .menu-content {
+            padding: 20px;
+        }
+
+        .menu-section {
+            margin-bottom: 25px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .menu-section:last-child {
+            border-bottom: none;
+        }
+
+        .menu-section h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .menu-item {
+            padding: 12px;
+            background: #f5f7ff;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover {
+            background: #e7edff;
+        }
+
+        .menu-item-title {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+
+        .menu-item-desc {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .weight-input {
+            margin-bottom: 30px;
+        }
+
+        .weight-input label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input[type="number"], select {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 18px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .section {
+            background: #f5f7ff;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .timer-section {
+            background: #fff4e6;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .timer-display {
+            font-size: 64px;
+            font-weight: 700;
+            color: #ff6b6b;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .timer-controls button {
+            padding: 14px 18px;
+            font-size: 24px;
+            min-width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        }
+
+        .btn-stop {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+        }
+
+        .btn-reset {
+            background: linear-gradient(135deg, #ffa94d 0%, #fd7e14 100%);
+        }
+
+        .btn-interval {
+            background: linear-gradient(135deg, #74c0fc 0%, #4dabf7 100%);
+        }
+
+        .btn-validate {
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+        }
+
+        .intake-button {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            font-size: 18px;
+        }
+
+        .history {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .history h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .history-time {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .history-amount {
+            color: #37b24d;
+            font-weight: 600;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .install-banner.hidden {
+            display: none;
+        }
+
+        .install-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 15px 20px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .install-banner-content {
+            flex: 1;
+            color: white;
+        }
+
+        .install-banner-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 3px;
+        }
+
+        .install-banner-text {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .install-button {
+            padding: 10px 20px;
+            background: white;
+            color: #667eea;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .install-close {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            font-size: 18px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .alert {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert p {
+            color: #856404;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+            transition: width 0.3s;
+        }
+
+        .big-number {
+            font-size: 56px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 10px 0;
+        }
+
+        /* Mobile optimization - reduce padding and margins */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+
+            .container {
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 15px 10px;
+                border-radius: 15px 15px 0 0;
+            }
+
+            .header h1 {
+                font-size: 18px;
+                margin-bottom: 5px;
+            }
+
+            .header p {
+                font-size: 13px;
+            }
+
+            .content {
+                padding: 10px;
+            }
+
+            .section {
+                margin-bottom: 12px;
+                padding: 12px;
+                border-radius: 8px;
+            }
+
+            .section h3 {
+                font-size: 16px;
+                margin-bottom: 10px;
+            }
+
+            .menu-button {
+                top: 10px;
+                right: 10px;
+                width: 36px;
+                height: 36px;
+            }
+
+            /* Reduce inline padding on mobile */
+            .section > div[style*="padding"] {
+                padding: 10px !important;
+            }
+
+            /* Adjust button padding */
+            button {
+                padding: 10px 15px !important;
+            }
+
+            /* Reduce margin for info displays */
+            .info-row {
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💧 Réhydratation Enfant</h1>
+            <p>Protocole Picolite pour gastro-entérite</p>
+            <button class="menu-button" onclick="openMenu()">☰</button>
+        </div>
+
+        <div class="content">
+            <!-- Weight Input -->
+            <div id="weightSection">
+                <div class="weight-input">
+                    <label for="childWeight">Poids de l'enfant (kg) :</label>
+                    <div class="input-group">
+                        <input type="number" id="childWeight" min="3" max="15" step="0.1" placeholder="Ex: 6.5">
+                        <button onclick="calculateProtocol()">Calculer</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Protocol Information -->
+            <!-- Current Intake Section - MOVED TO TOP -->
+            <div class="timer-section hidden" id="currentIntakeSection">
+                <h3>💧 Prochaine prise</h3>
+                <div class="big-number">
+                    <span id="currentIntakeAmount">-</span> ml
+                </div>
+                <p style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                    Prise <span id="intakeNumber">1</span> sur <span id="totalIntakes">4</span> cette heure
+                </p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="hourProgress"></div>
+                </div>
+                
+                <!-- Timer Display -->
+                <div style="margin: 20px 0;">
+                    <div class="timer-display" id="timerDisplay">15:00</div>
+                    <div style="text-align: center; color: #667eea; font-size: 14px; font-weight: 600; margin-top: 10px;" id="nextIntakeTime">
+                        Prochaine prise à --:--
+                    </div>
+                </div>
+                
+                <!-- Total Progress This Hour -->
+                <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px;">
+                    <p style="color: #666; font-size: 14px; text-align: center; margin-bottom: 8px;">
+                        <strong>Total cette heure</strong>
+                    </p>
+                    <div style="text-align: center; font-size: 32px; font-weight: 700; margin-bottom: 8px;">
+                        <span style="color: #37b24d;" id="totalGiven">0</span> 
+                        <span style="color: #999;">ml /</span> 
+                        <span style="color: #667eea;" id="totalTarget">0</span>
+                        <span style="color: #999;">ml</span>
+                    </div>
+                    <div class="progress-bar" style="height: 12px;">
+                        <div class="progress-fill" id="totalProgress" style="background: linear-gradient(135deg, #37b24d 0%, #2b8a3e 100%);"></div>
+                    </div>
+                </div>
+                
+                <!-- All Control Buttons on Same Line -->
+                <div class="timer-controls">
+                    <button class="btn-start" onclick="resumeTimer()" title="Reprendre">▶️</button>
+                    <button class="btn-reset" onclick="stopSchedule()" title="Mettre en pause">⏸️</button>
+                    <button class="btn-interval" onclick="openChangeIntervalModal()" title="Modifier l'intervalle">⚙️</button>
+                    <button class="btn-validate hidden" id="validateButton" onclick="validateIntake()" title="Valider la prise">
+                        ✓ <span id="validateAmount">-</span>ml
+                    </button>
+                </div>
+            </div>
+
+            <!-- Protocol Info Section - NOW BELOW with collapsible details -->
+            <div class="section hidden" id="protocolInfo">
+                <h3 style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin: 0;" onclick="toggleProtocolDetails()">
+                    <span>Protocole de réhydratation</span>
+                    <button style="background: rgba(102, 126, 234, 0.1); border: none; color: #667eea; width: 32px; height: 32px; border-radius: 8px; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;" id="protocolToggleBtn">
+                        ℹ️
+                    </button>
+                </h3>
+                
+                <div id="protocolDetails" style="margin-top: 15px;">
+                    <!-- Global Progress -->
+                    <div style="background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; border-left: 4px solid #37b24d;">
+                        <p style="color: #666; font-size: 14px; text-align: center; margin-bottom: 10px;">
+                            <strong>📊 Total depuis le début</strong>
+                        </p>
+                        <div style="text-align: center; font-size: 40px; font-weight: 700; margin-bottom: 10px;">
+                            <span style="color: #37b24d;" id="globalTotalGiven">0</span>
+                            <span style="color: #999; font-size: 24px;"> ml</span>
+                        </div>
+                        
+                        <!-- Détails par phase -->
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 12px; margin-bottom: 10px;">
+                            <!-- Phase 1 -->
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #e0e0e0;">
+                                <div style="font-size: 12px; color: #666; font-weight: 600;">Phase 1 (0-4h)</div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span style="font-size: 14px; font-weight: 600; color: #37b24d;" id="phase1Given">0</span>
+                                    <span style="font-size: 12px; color: #999;">/</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;" id="phase1Theoretical">0</span>
+                                    <span style="font-size: 11px; color: #999;">ml</span>
+                                    <span style="font-size: 13px; font-weight: 600; margin-left: 4px;" id="phase1Delta">0</span>
+                                </div>
+                            </div>
+                            <!-- Phase 2 -->
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="font-size: 12px; color: #666; font-weight: 600;">Phase 2 (4h+)</div>
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <span style="font-size: 14px; font-weight: 600; color: #37b24d;" id="phase2Given">0</span>
+                                    <span style="font-size: 12px; color: #999;">/</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #667eea;" id="phase2Theoretical">0</span>
+                                    <span style="font-size: 11px; color: #999;">ml</span>
+                                    <span style="font-size: 13px; font-weight: 600; margin-left: 4px;" id="phase2Delta">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Théorique et Delta global -->
+                        <div style="display: flex; justify-content: space-around; margin-bottom: 10px; padding: 10px; background: #f8f9fa; border-radius: 8px;">
+                            <div style="text-align: center;">
+                                <div style="font-size: 11px; color: #666; margin-bottom: 3px;">Théorique total</div>
+                                <div style="font-size: 18px; font-weight: 600; color: #667eea;" id="globalTheoretical">0 ml</div>
+                            </div>
+                            <div style="width: 1px; background: #e0e0e0;"></div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 11px; color: #666; margin-bottom: 3px;">Écart global</div>
+                                <div style="font-size: 18px; font-weight: 600;" id="globalDelta">0 ml</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-bar" style="height: 14px;">
+                            <div class="progress-fill" id="globalProgress" style="background: linear-gradient(135deg, #37b24d 0%, #2b8a3e 100%);"></div>
+                        </div>
+                        <p style="color: #999; font-size: 12px; text-align: center; margin-top: 8px;">
+                            Objectif Phase <span id="phaseNumber">1</span> : <span id="phaseTarget">-</span> ml
+                        </p>
+                    </div>
+                    
+                    <div class="info-row">
+                        <span class="info-label">Poids</span>
+                        <span class="info-value" id="displayWeight">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Phase actuelle</span>
+                        <span class="info-value" id="currentPhase">Phase 1</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Dose horaire</span>
+                        <span class="info-value" id="hourlyAmount">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Volume 24h</span>
+                        <span class="info-value" id="totalVolume">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Sachets nécessaires</span>
+                        <span class="info-value" id="sachetsCount">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Schedule Configuration -->
+            <div class="section hidden" id="scheduleSection">
+                <h3>⚙️ Configuration des prises</h3>
+                <label for="intakeInterval" class="info-label" style="display: block; margin-bottom: 10px;">Fréquence des prises :</label>
+                <select id="intakeInterval" onchange="updateSchedule()">
+                    <option value="10">Toutes les 10 minutes</option>
+                    <option value="15" selected>Toutes les 15 minutes</option>
+                    <option value="20">Toutes les 20 minutes</option>
+                    <option value="30">Toutes les 30 minutes</option>
+                    <option value="45">Toutes les 45 minutes</option>
+                    <option value="60">Toutes les 60 minutes</option>
+                </select>
+                <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 8px;">
+                    <div class="info-row">
+                        <span class="info-label">Nombre de prises/heure</span>
+                        <span class="info-value" id="intakesPerHour">4</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Quantité par prise</span>
+                        <span class="info-value" id="amountPerIntake">-</span>
+                    </div>
+                </div>
+                <button id="startButton" onclick="startOrContinueSchedule()" style="width: 100%; margin-top: 15px; background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);">
+                    ▶️ Démarrer le protocole
+                </button>
+                <button id="restartButton" onclick="restartSchedule()" class="hidden" style="width: 100%; margin-top: 10px; background: linear-gradient(135deg, #ffa94d 0%, #fd7e14 100%);">
+                    🔄 Redémarrer à zéro
+                </button>
+            </div>
+
+            <!-- Alert -->
+            <div class="alert hidden" id="phaseAlert">
+                <p id="alertText"></p>
+            </div>
+
+            <!-- Current Intake Display -->
+            <!-- Unified Current Intake and Timer Section -->
+
+            <!-- History -->
+            <div class="history hidden" id="historySection">
+                <h3>📋 Historique des prises</h3>
+                <div id="historyList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu Overlay and Panel -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    <div class="menu-panel" id="menuPanel">
+        <div class="menu-header">
+            <h2 style="margin: 0; font-size: 20px;">⚙️ Menu</h2>
+            <button class="menu-close" onclick="closeMenu()">×</button>
+        </div>
+        <div class="menu-content">
+            <!-- Export/Import Section -->
+            <div class="menu-section">
+                <h3>💾 Données</h3>
+                <div class="menu-item" onclick="exportData()">
+                    <div class="menu-item-title">📤 Exporter les données</div>
+                    <div class="menu-item-desc">Sauvegarder toutes les données en fichier JSON</div>
+                </div>
+                <div class="menu-item" onclick="exportChart()">
+                    <div class="menu-item-title">📊 Exporter le graphique</div>
+                    <div class="menu-item-desc">Télécharger un graphique de l'évolution</div>
+                </div>
+                <div class="menu-item" onclick="importData()">
+                    <div class="menu-item-title">📥 Importer les données</div>
+                    <div class="menu-item-desc">Restaurer depuis un fichier de sauvegarde</div>
+                </div>
+                <div class="menu-item" onclick="resetProtocol(); closeMenu();" style="background: #ffebee;">
+                    <div class="menu-item-title" style="color: #d32f2f;">🔄 Reprendre de zéro</div>
+                    <div class="menu-item-desc" style="color: #d32f2f;">Effacer toutes les données et recommencer</div>
+                </div>
+                <input type="file" id="importFileInput" accept=".json" style="display: none;" onchange="handleImportFile(event)">
+            </div>
+
+            <!-- Manual Entry Section -->
+            <div class="menu-section">
+                <h3>✏️ Saisie manuelle</h3>
+                <div class="menu-item" onclick="showManualEntryModal()">
+                    <div class="menu-item-title">➕ Ajouter une prise passée</div>
+                    <div class="menu-item-desc">Entrer manuellement une prise déjà effectuée</div>
+                </div>
+                <div class="menu-item" onclick="showVomitEntryModal()" style="background: #fff5f5;">
+                    <div class="menu-item-title" style="color: #c92a2a;">🤮 Enregistrer un vomissement</div>
+                    <div class="menu-item-desc" style="color: #c92a2a;">Saisir la quantité vomie pour ajuster le calcul</div>
+                </div>
+            </div>
+
+            <!-- Notifications Section -->
+            <div class="menu-section">
+                <h3>🔔 Notifications</h3>
+                <div class="menu-item" onclick="testNotification()">
+                    <div class="menu-item-title">🧪 Tester les notifications</div>
+                    <div class="menu-item-desc">Vérifier que les alertes fonctionnent</div>
+                </div>
+                <div class="menu-item" onclick="requestNotificationPermission()">
+                    <div class="menu-item-title">🔓 Autoriser les notifications</div>
+                    <div class="menu-item-desc">Activer les permissions</div>
+                </div>
+            </div>
+
+            <!-- Debug Section -->
+            <div class="menu-section">
+                <h3>🔍 Debug</h3>
+                <div class="menu-item" onclick="showDebugInfo()">
+                    <div class="menu-item-title">📊 Afficher les données</div>
+                    <div class="menu-item-desc">Voir toutes les données techniques</div>
+                </div>
+            </div>
+
+            <!-- About Section -->
+            <div class="menu-section">
+                <h3>ℹ️ À propos</h3>
+                <div style="padding: 12px; background: #f5f7ff; border-radius: 8px; font-size: 13px; color: #666;">
+                    <p style="margin-bottom: 8px;"><strong>Application Réhydratation</strong></p>
+                    <p style="margin-bottom: 8px;">Protocole Picolite pour gastro-entérite</p>
+                    <p style="margin-bottom: 8px;">Version 1.0</p>
+                    <p style="margin: 0; font-size: 11px; opacity: 0.8;">Toutes les données restent sur votre appareil</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Install Banner -->
+    <div class="install-banner hidden" id="installBanner">
+        <div class="install-banner-content">
+            <div class="install-banner-title">📱 Installer l'application</div>
+            <div class="install-banner-text">Accès rapide depuis votre écran d'accueil</div>
+        </div>
+        <button class="install-button" id="installButton">Installer</button>
+        <button class="install-close" id="installClose">×</button>
+    </div>
+
+    <script>
+        // Global state
+        let state = {
+            weight: 0,
+            phase1Amount: 0,
+            phase2Amount: 0,
+            totalVolume24h: 0,
+            sachetsCount: 0,
+            currentPhase: 1,
+            intakeInterval: 15,
+            intakesPerHour: 4,
+            amountPerIntake: 0,
+            currentIntakeNumber: 0,
+            totalIntakesThisHour: 0,
+            timerInterval: null,
+            timerSeconds: 900,
+            isTimerRunning: false,
+            startTime: null,
+            hourStartTime: null,
+            history: []
+        };
+
+        // Active notification for timer
+        let activeTimerNotification = null;
+
+        // Wake Lock to keep screen active during timer
+        let wakeLock = null;
+
+        // PWA Install handling
+        let deferredPrompt;
+        
+        // Menu functions
+        function openMenu() {
+            document.getElementById('menuOverlay').classList.add('active');
+            document.getElementById('menuPanel').classList.add('active');
+        }
+
+        function closeMenu() {
+            document.getElementById('menuOverlay').classList.remove('active');
+            document.getElementById('menuPanel').classList.remove('active');
+        }
+
+        // Export/Import functions
+        function exportData() {
+            const data = localStorage.getItem('rehydratationData');
+            if (!data) {
+                alert('Aucune donnée à exporter');
+                return;
+            }
+
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            
+            // Filename with timestamp
+            const now = new Date();
+            const timestamp = now.toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '-');
+            a.download = `rehydratation_backup_${timestamp}.json`;
+            
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            closeMenu();
+            alert('✅ Données exportées avec succès !\n\nLe fichier a été téléchargé.');
+        }
+
+        // Export chart function with THEORETICAL LINE
+        function exportChart() {
+            if (state.history.length === 0) {
+                alert('❌ Aucune donnée à afficher\n\nCommencez à enregistrer des prises pour générer un graphique.');
+                closeMenu();
+                return;
+            }
+
+            closeMenu();
+
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = 1200;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Title
+            ctx.fillStyle = '#667eea';
+            ctx.font = 'bold 32px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('📊 Évolution de la réhydratation', canvas.width / 2, 50);
+
+            // Subtitle with child info
+            ctx.fillStyle = '#666';
+            ctx.font = '18px Arial';
+            ctx.fillText(`Enfant: ${state.weight} kg - Protocole Picolite`, canvas.width / 2, 85);
+
+            // Chart area dimensions
+            const chartX = 100;
+            const chartY = 120;
+            const chartWidth = canvas.width - 200;
+            const chartHeight = canvas.height - 220;
+
+            // Calculate data points
+            const dataPoints = [];
+            let cumulativeIntake = 0;
+            let cumulativeVomit = 0;
+            
+            // Sort history by timestamp
+            const sortedHistory = [...state.history].sort((a, b) => 
+                new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+            );
+
+            // Add starting point (0,0)
+            if (sortedHistory.length > 0) {
+                const firstTimestamp = new Date(sortedHistory[0].timestamp).getTime();
+                dataPoints.push({
+                    time: 0,
+                    timestamp: firstTimestamp,
+                    intake: 0,
+                    net: 0,
+                    theoretical: 0,
+                    phase: 1  // Always start in Phase 1
+                });
+            }
+
+            // Calculate theoretical intake based on interval and time
+            let theoreticalCumulative = 0;
+            const firstTimestamp = dataPoints[0].timestamp;
+
+            // Process each entry
+            sortedHistory.forEach(entry => {
+                if (entry.type === 'vomit') {
+                    cumulativeVomit += entry.amount;
+                } else {
+                    cumulativeIntake += entry.amount;
+                }
+
+                const timestamp = new Date(entry.timestamp).getTime();
+                const timeOffset = timestamp - firstTimestamp;
+                const timeInMinutes = Math.floor(timeOffset / 60000);
+
+                // Calculate theoretical amount based on protocol phases
+                // Phase 1: 0-4h (240 min) at phase1Amount ml/h
+                // Phase 2: 4h+ at phase2Amount ml/h
+                if (timeInMinutes <= 240) {
+                    // Phase 1: first 4 hours
+                    const hoursElapsed = timeInMinutes / 60;
+                    theoreticalCumulative = Math.round(hoursElapsed * state.phase1Amount);
+                } else {
+                    // Phase 2: after 4 hours
+                    const phase1Total = state.phase1Amount * 4; // Total from Phase 1
+                    const minutesInPhase2 = timeInMinutes - 240;
+                    const hoursInPhase2 = minutesInPhase2 / 60;
+                    const phase2Cumulative = Math.round(hoursInPhase2 * state.phase2Amount);
+                    theoreticalCumulative = phase1Total + phase2Cumulative;
+                }
+
+                // Calculate calculated phase based on time (not stored phase field)
+                const calculatedPhase = timeInMinutes < 240 ? 1 : 2;
+
+                dataPoints.push({
+                    time: timeInMinutes,
+                    timestamp: timestamp,
+                    intake: cumulativeIntake,
+                    vomit: cumulativeVomit,
+                    net: cumulativeIntake - cumulativeVomit,
+                    theoretical: theoreticalCumulative,
+                    phase: calculatedPhase,
+                    isVomit: entry.type === 'vomit'
+                });
+            });
+
+            // Find max values for scaling
+            const maxTime = dataPoints[dataPoints.length - 1].time;
+            const maxIntake = Math.max(...dataPoints.map(p => p.intake));
+            const maxNet = Math.max(...dataPoints.map(p => p.net));
+            const maxTheoretical = Math.max(...dataPoints.map(p => p.theoretical));
+            const maxValue = Math.max(maxIntake, maxNet, maxTheoretical);
+
+            // Draw axes
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(chartX, chartY);
+            ctx.lineTo(chartX, chartY + chartHeight);
+            ctx.lineTo(chartX + chartWidth, chartY + chartHeight);
+            ctx.stroke();
+
+            // Draw grid lines
+            ctx.strokeStyle = '#e0e0e0';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const y = chartY + (chartHeight / 10) * i;
+                ctx.beginPath();
+                ctx.moveTo(chartX, y);
+                ctx.lineTo(chartX + chartWidth, y);
+                ctx.stroke();
+            }
+
+            // Y-axis labels (ml)
+            ctx.fillStyle = '#666';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 10; i++) {
+                const value = Math.round((maxValue / 10) * (10 - i));
+                const y = chartY + (chartHeight / 10) * i;
+                ctx.fillText(value + ' ml', chartX - 10, y + 5);
+            }
+
+            // X-axis labels (time)
+            ctx.textAlign = 'center';
+            const timeSteps = 6;
+            for (let i = 0; i <= timeSteps; i++) {
+                const minutes = Math.round((maxTime / timeSteps) * i);
+                const hours = Math.floor(minutes / 60);
+                const mins = minutes % 60;
+                const timeLabel = hours > 0 ? `${hours}h${mins > 0 ? mins.toString().padStart(2, '0') : ''}` : `${mins}min`;
+                const x = chartX + (chartWidth / timeSteps) * i;
+                ctx.fillText(timeLabel, x, chartY + chartHeight + 25);
+            }
+
+            // Draw data lines
+            function drawLine(points, color, lineWidth = 3, isDashed = false) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = lineWidth;
+                if (isDashed) {
+                    ctx.setLineDash([5, 5]);
+                } else {
+                    ctx.setLineDash([]);
+                }
+                ctx.beginPath();
+                
+                points.forEach((point, index) => {
+                    const x = chartX + (point.time / maxTime) * chartWidth;
+                    const y = chartY + chartHeight - (point.value / maxValue) * chartHeight;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // Draw theoretical line (dashed grey) - what should have been given
+            const theoreticalPoints = dataPoints.map(p => ({ time: p.time, value: p.theoretical }));
+            drawLine(theoreticalPoints, '#999999', 2, true);
+
+            // Draw intake line (solid green) - what was actually given
+            const intakePoints = dataPoints.map(p => ({ time: p.time, value: p.intake }));
+            drawLine(intakePoints, '#51cf66', 3);
+
+            // Draw net line (solid blue) - intake minus vomit
+            const netPoints = dataPoints.map(p => ({ time: p.time, value: p.net }));
+            drawLine(netPoints, '#667eea', 3);
+
+            // Draw phase separator at exactly 4 hours (240 minutes) if applicable
+            if (maxTime > 240) {
+                const x = chartX + (240 / maxTime) * chartWidth;
+                
+                ctx.strokeStyle = '#ff6b6b';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(x, chartY);
+                ctx.lineTo(x, chartY + chartHeight);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                ctx.fillStyle = '#ff6b6b';
+                ctx.font = 'bold 12px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Phase 1 → Phase 2 (4h)', x, chartY - 10);
+            }
+
+            // Draw vomit markers
+            dataPoints.forEach(point => {
+                if (point.isVomit) {
+                    const x = chartX + (point.time / maxTime) * chartWidth;
+                    const y = chartY + chartHeight - (point.net / maxValue) * chartHeight;
+                    
+                    ctx.fillStyle = '#ff6b6b';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.strokeStyle = '#ffffff';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(x, y, 6, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+
+            // Legend
+            const legendY = chartY + chartHeight + 60;
+            const legendX = chartX;
+
+            // Theoretical line (dashed grey)
+            ctx.strokeStyle = '#999999';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(legendX, legendY);
+            ctx.lineTo(legendX + 40, legendY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillStyle = '#333';
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText('Théorique (protocole)', legendX + 50, legendY + 5);
+
+            // Intake line (solid green)
+            ctx.strokeStyle = '#51cf66';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(legendX + 220, legendY);
+            ctx.lineTo(legendX + 260, legendY);
+            ctx.stroke();
+            ctx.fillText('Réel donné', legendX + 270, legendY + 5);
+
+            // Net line (solid blue)
+            ctx.strokeStyle = '#667eea';
+            ctx.beginPath();
+            ctx.moveTo(legendX + 390, legendY);
+            ctx.lineTo(legendX + 430, legendY);
+            ctx.stroke();
+            ctx.fillText('Net (donné - vomi)', legendX + 440, legendY + 5);
+
+            // Vomit marker (add below the lines)
+            const vomitLegendY = legendY + 30;
+            ctx.fillStyle = '#ff6b6b';
+            ctx.beginPath();
+            ctx.arc(legendX + 20, vomitLegendY, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('Vomissement', legendX + 35, vomitLegendY + 5);
+
+            // Stats box
+            const statsY = legendY + 60;
+            ctx.fillStyle = '#f5f7ff';
+            ctx.fillRect(chartX, statsY, chartWidth, 50);
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(chartX, statsY, chartWidth, 50);
+
+            ctx.fillStyle = '#333';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillText(`📊 Statistiques finales`, chartX + 20, statsY + 25);
+            
+            ctx.font = '14px Arial';
+            const finalIntake = cumulativeIntake;
+            const finalVomit = cumulativeVomit;
+            const finalNet = finalIntake - finalVomit;
+            const finalTheoretical = theoreticalCumulative;
+            const difference = finalNet - finalTheoretical;
+            const diffText = difference >= 0 ? `+${difference}` : `${difference}`;
+            ctx.fillText(`Donné: ${finalIntake} ml | Vomi: ${finalVomit} ml | Net: ${finalNet} ml | Théorique: ${finalTheoretical} ml | Écart: ${diffText} ml`, chartX + 20, statsY + 45);
+
+            // Footer
+            ctx.fillStyle = '#999';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            const now = new Date();
+            ctx.fillText(`Généré le ${now.toLocaleDateString('fr-FR')} à ${now.toLocaleTimeString('fr-FR')}`, canvas.width / 2, canvas.height - 10);
+
+            // Convert canvas to image and download
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                const timestamp = new Date().toISOString().slice(0, 16).replace('T', '_').replace(/:/g, '-');
+                a.download = `graphique_rehydratation_${timestamp}.png`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('✅ Graphique exporté avec succès !');
+            });
+        }
+
+        function importData() {
+            if (state.history.length > 0) {
+                if (!confirm('⚠️ Attention !\n\nVous avez déjà des données. L\'import va ÉCRASER toutes vos données actuelles.\n\nVoulez-vous continuer ?')) {
+                    return;
+                }
+            }
+            
+            document.getElementById('importFileInput').click();
+            closeMenu();
+        }
+
+        function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    
+                    // Validate data structure
+                    if (!importedData.weight || !importedData.history) {
+                        throw new Error('Format de fichier invalide');
+                    }
+                    
+                    // Save imported data
+                    localStorage.setItem('rehydratationData', e.target.result);
+                    
+                    // Reload the page to apply imported data
+                    alert('✅ Données importées avec succès !\n\nL\'application va se recharger.');
+                    window.location.reload();
+                    
+                } catch (error) {
+                    alert('❌ Erreur lors de l\'import :\n\n' + error.message + '\n\nVérifiez que le fichier est valide.');
+                }
+            };
+            reader.readAsText(file);
+            
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // Notification functions
+        function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                alert('❌ Les notifications ne sont pas supportées sur ce navigateur.');
+                closeMenu();
+                return;
+            }
+
+            if (Notification.permission === 'granted') {
+                alert('✅ Les notifications sont déjà autorisées !');
+                closeMenu();
+                return;
+            }
+
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    alert('✅ Notifications autorisées !\n\nVous recevrez des alertes pour chaque prise.');
+                    testNotification();
+                } else {
+                    alert('❌ Permissions refusées.\n\nActivez-les dans les paramètres du navigateur.');
+                }
+                closeMenu();
+            });
+        }
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent the mini-infobar from appearing on mobile
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            // Show install banner if not previously dismissed
+            const dismissed = localStorage.getItem('installBannerDismissed');
+            if (!dismissed) {
+                document.getElementById('installBanner').classList.remove('hidden');
+            }
+        });
+
+        document.getElementById('installButton').addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                // Fallback for browsers that don't support install prompt
+                showManualInstallInstructions();
+                return;
+            }
+            
+            // Show the install prompt
+            deferredPrompt.prompt();
+            
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            
+            if (outcome === 'accepted') {
+                console.log('User accepted the install prompt');
+            }
+            
+            // Clear the deferredPrompt
+            deferredPrompt = null;
+            
+            // Hide the banner
+            document.getElementById('installBanner').classList.add('hidden');
+        });
+
+        document.getElementById('installClose').addEventListener('click', () => {
+            document.getElementById('installBanner').classList.add('hidden');
+            localStorage.setItem('installBannerDismissed', 'true');
+        });
+
+        function showManualInstallInstructions() {
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            const isAndroid = /Android/.test(navigator.userAgent);
+            
+            let instructions = '📱 Pour installer l\'application :\n\n';
+            
+            if (isIOS) {
+                instructions += '🍎 Sur iOS (Safari) :\n';
+                instructions += '1. Appuyez sur le bouton Partager 📤\n';
+                instructions += '2. Faites défiler et sélectionnez "Sur l\'écran d\'accueil"\n';
+                instructions += '3. Appuyez sur "Ajouter"\n';
+            } else if (isAndroid) {
+                instructions += '🤖 Sur Android :\n';
+                instructions += '1. Appuyez sur le menu ⋮ (3 points)\n';
+                instructions += '2. Sélectionnez "Ajouter à l\'écran d\'accueil"\n';
+                instructions += '3. Confirmez l\'ajout\n';
+            } else {
+                instructions += '1. Ouvrez le menu de votre navigateur\n';
+                instructions += '2. Cherchez "Ajouter à l\'écran d\'accueil" ou "Installer"\n';
+                instructions += '3. Suivez les instructions\n';
+            }
+            
+            alert(instructions);
+        }
+
+        // Check if app is already installed
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA was installed');
+            document.getElementById('installBanner').classList.add('hidden');
+            localStorage.setItem('installBannerDismissed', 'true');
+        });
+
+        // Hide banner if already in standalone mode
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            document.getElementById('installBanner').classList.add('hidden');
+        }
+
+        // LocalStorage
+        function saveState() {
+            const dataToSave = {
+                weight: state.weight,
+                phase1Amount: state.phase1Amount,
+                phase2Amount: state.phase2Amount,
+                totalVolume24h: state.totalVolume24h,
+                sachetsCount: state.sachetsCount,
+                currentPhase: state.currentPhase,
+                intakeInterval: state.intakeInterval,
+                intakesPerHour: state.intakesPerHour,
+                amountPerIntake: state.amountPerIntake,
+                currentIntakeNumber: state.currentIntakeNumber,
+                totalIntakesThisHour: state.totalIntakesThisHour,
+                timerSeconds: state.timerSeconds,
+                hourStartTime: state.hourStartTime,
+                history: state.history
+            };
+            localStorage.setItem('rehydratationData', JSON.stringify(dataToSave));
+        }
+
+        function loadState() {
+            const saved = localStorage.getItem('rehydratationData');
+            if (saved) {
+                const data = JSON.parse(saved);
+                Object.assign(state, data);
+                
+                // Fill weight input field with saved value
+                if (state.weight > 0) {
+                    document.getElementById('childWeight').value = state.weight;
+                    // Hide weight section immediately if data exists to skip Calculate step
+                    document.getElementById('weightSection').classList.add('hidden');
+                }
+                
+                updateProtocolDisplay();
+                
+                if (state.hourStartTime) {
+                    // Protocol was started at some point
+                    recalculateCurrentHourIntakes();
+                    
+                    // Check if we should auto-resume or show config
+                    // If the last intake was recent (< 2 * interval), auto-resume
+                    const mostRecent = getMostRecentEntry();
+                    const shouldAutoResume = state.history.length > 0 && 
+                                            mostRecent &&
+                                            state.currentIntakeNumber < state.intakesPerHour &&
+                                            (Date.now() - new Date(mostRecent.timestamp).getTime()) < (state.intakeInterval * 60 * 1000 * 2);
+                    
+                    if (shouldAutoResume) {
+                        // Auto-resume active protocol
+                        // Calculate remaining time for next intake
+                        const lastIntake = mostRecent;
+                        const lastIntakeTime = new Date(lastIntake.timestamp).getTime();
+                        const now = Date.now();
+                        const timeSinceLastIntake = Math.floor((now - lastIntakeTime) / 1000); // in seconds
+                        
+                        // Calculate remaining time
+                        const intervalSeconds = state.intakeInterval * 60;
+                        const remainingSeconds = intervalSeconds - timeSinceLastIntake;
+                        
+                        if (remainingSeconds > 0) {
+                            state.timerSeconds = remainingSeconds;
+                        } else {
+                            // Next intake is due or overdue
+                            state.timerSeconds = 0;
+                        }
+                        
+                        showActiveSections();
+                        updateScheduleDisplay();
+                        updateTimerDisplay();
+                        // Auto-start timer in resume mode
+                        startTimer();
+                    } else {
+                        // Show config with "Continue" button
+                        // Still recalculate timer to show accurate remaining time
+                        if (state.history.length > 0) {
+                            const lastIntake = getMostRecentEntry();
+                            if (lastIntake) {
+                                const lastIntakeTime = new Date(lastIntake.timestamp).getTime();
+                            const now = Date.now();
+                            const timeSinceLastIntake = Math.floor((now - lastIntakeTime) / 1000);
+                            
+                            const intervalSeconds = state.intakeInterval * 60;
+                            const remainingSeconds = intervalSeconds - timeSinceLastIntake;
+                            
+                            if (remainingSeconds > 0) {
+                                state.timerSeconds = remainingSeconds;
+                            } else {
+                                state.timerSeconds = 0;
+                            }
+                            }
+                        }
+                        
+                        showConfigSections();
+                        updateSchedule();
+                        updateGlobalProgress();
+                    }
+                } else if (state.weight > 0) {
+                    // Weight set but protocol never started
+                    showConfigSections();
+                    updateSchedule();
+                    updateGlobalProgress();
+                }
+                
+                // Clear history list before repopulating to prevent duplicates
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = '';
+                
+                // Sort history by timestamp (most recent first)
+                const sortedHistory = [...state.history].sort((a, b) => {
+                    const timeA = new Date(a.timestamp).getTime();
+                    const timeB = new Date(b.timestamp).getTime();
+                    return timeB - timeA; // Descending order
+                });
+                
+                // Find first intake to calculate phases dynamically
+                const intakes = state.history.filter(item => item.type !== 'vomit');
+                let firstIntakeTime = null;
+                if (intakes.length > 0) {
+                    const sortedIntakes = [...intakes].sort((a, b) => {
+                        const timeA = new Date(a.timestamp).getTime();
+                        const timeB = new Date(b.timestamp).getTime();
+                        return timeA - timeB;
+                    });
+                    firstIntakeTime = new Date(sortedIntakes[0].timestamp).getTime();
+                }
+                
+                let lastCalculatedPhase = null;
+                sortedHistory.forEach((intake) => {
+                    // Calculate which phase this entry should be in based on TIME
+                    // IMPORTANT: Calculate for BOTH intakes AND vomits to properly detect phase changes
+                    let calculatedPhase = null;
+                    if (firstIntakeTime) {
+                        const entryTime = new Date(intake.timestamp).getTime();
+                        const hoursFromStart = (entryTime - firstIntakeTime) / (1000 * 60 * 60);
+                        calculatedPhase = hoursFromStart < 4 ? 1 : 2;
+                    }
+                    
+                    // Add phase separator if phase changes (based on calculated phase, not stored phase)
+                    if (calculatedPhase && lastCalculatedPhase && calculatedPhase !== lastCalculatedPhase) {
+                        const separator = document.createElement('div');
+                        separator.style.cssText = 'margin: 15px 0; padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; text-align: center; color: white; font-weight: 600; font-size: 14px;';
+                        separator.textContent = `━━━ Passage Phase ${lastCalculatedPhase} → Phase ${calculatedPhase} (Théorique: +4h) ━━━`;
+                        historyList.appendChild(separator);
+                    }
+                    
+                    addHistoryItem(intake);
+                    
+                    // Update lastCalculatedPhase for next iteration (for ALL entries, including vomits)
+                    if (calculatedPhase) {
+                        lastCalculatedPhase = calculatedPhase;
+                    }
+                });
+            }
+        }
+
+        function getMostRecentEntry() {
+            // Get the most recent entry from history (by timestamp)
+            if (!state.history || state.history.length === 0) return null;
+            
+            return state.history.reduce((most, current) => {
+                const mostTime = new Date(most.timestamp).getTime();
+                const currentTime = new Date(current.timestamp).getTime();
+                return currentTime > mostTime ? current : most;
+            });
+        }
+
+        function recalculateCurrentHourIntakes() {
+            if (!state.history || state.history.length === 0) {
+                state.totalIntakesThisHour = 0;
+                state.currentIntakeNumber = 0;
+                return;
+            }
+            
+            // Use rolling hour stats for consistency
+            const rollingStats = calculateRollingHourStats();
+            state.totalIntakesThisHour = rollingStats.count;
+            state.currentIntakeNumber = rollingStats.count;
+            
+            // If no hourStartTime or hourStartTime is after first intake, recalculate it
+            const firstIntakeTime = new Date(state.history[state.history.length - 1].timestamp).getTime();
+            
+            if (!state.hourStartTime || state.hourStartTime > firstIntakeTime) {
+                // Find the start of the current "hour period" based on intake pattern
+                // Group intakes and find the most recent hour boundary
+                const now = Date.now();
+                
+                // Find intakes within the last 70 minutes (to handle slight timing variations)
+                const recentIntakes = state.history.filter(intake => {
+                    const intakeTime = new Date(intake.timestamp).getTime();
+                    return (now - intakeTime) < (70 * 60 * 1000);
+                });
+                
+                if (recentIntakes.length > 0) {
+                    // Set hourStartTime to the oldest recent intake
+                    const oldestRecent = recentIntakes[recentIntakes.length - 1];
+                    state.hourStartTime = new Date(oldestRecent.timestamp).getTime();
+                } else {
+                    // Use first intake if none are recent
+                    state.hourStartTime = firstIntakeTime;
+                }
+            }
+            
+            console.log('Recalculated current hour with rolling stats:', {
+                intakesInLastHour: rollingStats.count,
+                totalMl: rollingStats.totalMl,
+                allHistoryCount: state.history.length
+            });
+        }
+
+        function clearState() {
+            localStorage.removeItem('rehydratationData');
+        }
+
+        // Calculate protocol
+        function calculateProtocol() {
+            const weight = parseFloat(document.getElementById('childWeight').value);
+            
+            if (!weight || weight < 3 || weight > 15) {
+                alert('Veuillez entrer un poids valide entre 3 et 15 kg');
+                return;
+            }
+
+            state.weight = weight;
+            state.phase1Amount = Math.round(weight * 15);
+            state.phase2Amount = Math.round(weight * 5.5);
+            state.totalVolume24h = (state.phase1Amount * 4) + (state.phase2Amount * 20);
+            state.sachetsCount = Math.ceil(state.totalVolume24h / 200);
+
+            updateProtocolDisplay();
+            updateSchedule();
+            updateGlobalProgress();
+            showConfigSections(); // This will call updateStartButton
+            saveState();
+        }
+
+        function updateProtocolDisplay() {
+            document.getElementById('displayWeight').textContent = state.weight + ' kg';
+            document.getElementById('currentPhase').textContent = `Phase ${state.currentPhase}`;
+            
+            const hourlyAmount = state.currentPhase === 1 ? state.phase1Amount : state.phase2Amount;
+            document.getElementById('hourlyAmount').textContent = hourlyAmount + ' ml/h';
+            document.getElementById('totalVolume').textContent = state.totalVolume24h + ' ml';
+            document.getElementById('sachetsCount').textContent = state.sachetsCount + ' sachets';
+        }
+
+        function toggleProtocolDetails() {
+            const details = document.getElementById('protocolDetails');
+            const btn = document.getElementById('protocolToggleBtn');
+            
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                btn.textContent = 'ℹ️';
+            } else {
+                details.style.display = 'none';
+                btn.textContent = '👁️';
+            }
+        }
+
+        function showConfigSections() {
+            document.getElementById('weightSection').classList.add('hidden');
+            document.getElementById('protocolInfo').classList.remove('hidden');
+            document.getElementById('scheduleSection').classList.remove('hidden');
+            document.getElementById('historySection').classList.remove('hidden');
+            
+            // Expand protocol details in config mode
+            document.getElementById('protocolDetails').style.display = 'block';
+            document.getElementById('protocolToggleBtn').textContent = 'ℹ️';
+            
+            updateStartButton(); // Update button text based on state
+        }
+
+        function showActiveSections() {
+            document.getElementById('weightSection').classList.add('hidden');
+            document.getElementById('protocolInfo').classList.remove('hidden');
+            document.getElementById('historySection').classList.remove('hidden');
+            document.getElementById('scheduleSection').classList.add('hidden');
+            document.getElementById('currentIntakeSection').classList.remove('hidden');
+            document.getElementById('validateButton').classList.remove('hidden');
+            
+            // Collapse protocol details when active to save space
+            document.getElementById('protocolDetails').style.display = 'none';
+            document.getElementById('protocolToggleBtn').textContent = '👁️';
+        }
+
+        function hideActiveSections() {
+            document.getElementById('scheduleSection').classList.remove('hidden');
+            document.getElementById('currentIntakeSection').classList.add('hidden');
+            document.getElementById('validateButton').classList.add('hidden');
+            
+            // Expand protocol details when returning to config
+            document.getElementById('protocolDetails').style.display = 'block';
+            document.getElementById('protocolToggleBtn').textContent = 'ℹ️';
+            
+            updateStartButton(); // Update button when returning to config
+        }
+
+        // Schedule management
+        function updateSchedule() {
+            state.intakeInterval = parseInt(document.getElementById('intakeInterval').value);
+            state.intakesPerHour = 60 / state.intakeInterval;
+            
+            const hourlyAmount = state.currentPhase === 1 ? state.phase1Amount : state.phase2Amount;
+            state.amountPerIntake = Math.round(hourlyAmount / state.intakesPerHour);
+            
+            document.getElementById('intakesPerHour').textContent = state.intakesPerHour;
+            document.getElementById('amountPerIntake').textContent = state.amountPerIntake + ' ml';
+            
+            saveState();
+        }
+
+        function checkIfProtocolInProgress() {
+            // Check if there's already an active protocol
+            // If hourStartTime exists, protocol is in progress (even if no history yet)
+            return state.hourStartTime !== null;
+        }
+
+        function updateStartButton() {
+            const startButton = document.getElementById('startButton');
+            const restartButton = document.getElementById('restartButton');
+            
+            if (checkIfProtocolInProgress()) {
+                startButton.innerHTML = '▶️ Continuer le protocole';
+                startButton.style.background = 'linear-gradient(135deg, #51cf66 0%, #37b24d 100%)';
+                restartButton.classList.remove('hidden');
+            } else {
+                startButton.innerHTML = '▶️ Démarrer le protocole';
+                startButton.style.background = 'linear-gradient(135deg, #51cf66 0%, #37b24d 100%)';
+                restartButton.classList.add('hidden');
+            }
+        }
+
+        function startOrContinueSchedule() {
+            if (checkIfProtocolInProgress()) {
+                // Continue existing protocol
+                continueSchedule();
+            } else {
+                // Start new protocol
+                startSchedule();
+            }
+        }
+
+        function continueSchedule() {
+            // Resume existing protocol - don't reset anything
+            
+            // Calculate rolling hour stats to determine current position
+            const rollingStats = calculateRollingHourStats();
+            
+            // Calculate when the next intake should be
+            if (state.history.length > 0) {
+                // Get intakes from rolling hour
+                if (rollingStats.intakes.length > 0) {
+                    // Calculate time since last intake
+                    const lastIntakeTimestamp = new Date(rollingStats.intakes[0].timestamp).getTime();
+                    const timeSinceLastIntake = Date.now() - lastIntakeTimestamp;
+                    
+                    // Calculate remaining time until next intake
+                    const intervalMs = state.intakeInterval * 60 * 1000;
+                    const remainingMs = Math.max(0, intervalMs - timeSinceLastIntake);
+                    state.timerSeconds = Math.floor(remainingMs / 1000);
+                    
+                    // If time has passed, notify immediately
+                    if (state.timerSeconds === 0) {
+                        setTimeout(() => notifyIntake(), 500);
+                    }
+                } else {
+                    // No intakes in rolling hour yet, start fresh timer
+                    state.timerSeconds = state.intakeInterval * 60;
+                }
+            } else {
+                // No history yet or starting first intake
+                state.timerSeconds = state.intakeInterval * 60;
+            }
+            
+            showActiveSections();
+            updateScheduleDisplay();
+            updateTimerDisplay();
+            startTimer();
+            saveState();
+        }
+
+        function startSchedule() {
+            // Start fresh protocol only if no history exists
+            if (state.history.length > 0) {
+                // Resume existing protocol - calculate time since last intake
+                recalculateCurrentHourIntakes();
+                
+                // Get the most recent intake
+                const lastIntake = getMostRecentEntry();
+                if (lastIntake) {
+                    const lastIntakeTime = new Date(lastIntake.timestamp).getTime();
+                const now = Date.now();
+                const timeSinceLastIntake = Math.floor((now - lastIntakeTime) / 1000); // in seconds
+                
+                // Calculate remaining time for next intake
+                const intervalSeconds = state.intakeInterval * 60;
+                const remainingSeconds = intervalSeconds - timeSinceLastIntake;
+                
+                if (remainingSeconds > 0) {
+                    // Still time remaining before next intake
+                    state.timerSeconds = remainingSeconds;
+                } else {
+                    // Next intake is already due or overdue
+                    state.timerSeconds = 0;
+                }
+                }
+            } else {
+                // Truly fresh start
+                state.hourStartTime = Date.now();
+                state.timerSeconds = state.intakeInterval * 60;
+            }
+            
+            showActiveSections();
+            updateScheduleDisplay();
+            startTimer();
+            saveState();
+        }
+
+        function restartSchedule() {
+            if (confirm('⚠️ Voulez-vous vraiment redémarrer le protocole à zéro ?\n\nToutes les prises enregistrées seront conservées dans l\'historique, mais le compteur de l\'heure sera réinitialisé.')) {
+                // Reset current hour but keep history
+                state.hourStartTime = Date.now();
+                state.timerSeconds = state.intakeInterval * 60;
+                
+                showActiveSections();
+                updateScheduleDisplay();
+                startTimer();
+                saveState();
+            }
+        }
+
+        function stopSchedule() {
+            if (confirm('Voulez-vous mettre le protocole en pause ?\n\nVous pourrez le reprendre plus tard avec "Continuer le protocole".')) {
+                stopTimer();
+                // Don't reset hourStartTime or counters - just pause
+                hideActiveSections();
+                saveState();
+            }
+        }
+
+        function openChangeIntervalModal() {
+            const currentInterval = state.intakeInterval;
+            const message = `Intervalle actuel : ${currentInterval} minutes\n\nChoisir le nouvel intervalle :`;
+            
+            const intervals = [
+                { value: 10, label: '10 minutes (6 prises/heure)' },
+                { value: 15, label: '15 minutes (4 prises/heure)' },
+                { value: 20, label: '20 minutes (3 prises/heure)' },
+                { value: 30, label: '30 minutes (2 prises/heure)' },
+                { value: 45, label: '45 minutes (1.33 prises/heure)' },
+                { value: 60, label: '60 minutes (1 prise/heure)' }
+            ];
+            
+            let options = message + '\n\n';
+            intervals.forEach((interval, index) => {
+                const current = interval.value === currentInterval ? ' ← ACTUEL' : '';
+                options += `${index + 1}. ${interval.label}${current}\n`;
+            });
+            options += '\nEntrez le numéro de votre choix (1-6) :';
+            
+            const choice = prompt(options);
+            const choiceNum = parseInt(choice);
+            
+            if (choiceNum >= 1 && choiceNum <= 6) {
+                const newInterval = intervals[choiceNum - 1].value;
+                if (newInterval !== currentInterval) {
+                    changeIntervalTo(newInterval);
+                }
+            }
+        }
+
+        function changeIntervalTo(newInterval) {
+            const oldInterval = state.intakeInterval;
+            
+            if (!confirm(`⚠️ Confirmer le changement :\n\n` +
+                        `Ancien intervalle : ${oldInterval} minutes\n` +
+                        `Nouvel intervalle : ${newInterval} minutes\n\n` +
+                        `L'historique sera conservé.\n` +
+                        `Le timer sera réinitialisé.`)) {
+                return;
+            }
+            
+            // Pause timer
+            stopTimer();
+            
+            // Update interval and recalculate
+            state.intakeInterval = newInterval;
+            state.intakesPerHour = 60 / newInterval;
+            
+            const hourlyAmount = state.currentPhase === 1 ? state.phase1Amount : state.phase2Amount;
+            state.amountPerIntake = Math.round(hourlyAmount / state.intakesPerHour);
+            
+            // Use last intake timestamp as reference, or current time if no history
+            if (state.history.length > 0) {
+                const mostRecent = getMostRecentEntry();
+                state.hourStartTime = mostRecent ? new Date(mostRecent.timestamp).getTime() : Date.now();
+            } else {
+                state.hourStartTime = Date.now();
+            }
+            
+            // Recalculate counters from history
+            recalculateCurrentHourIntakes();
+            
+            // Set timer for next intake
+            state.timerSeconds = state.intakeInterval * 60;
+            
+            // Update display
+            updateScheduleDisplay();
+            updateTimerDisplay();
+            
+            // Restart timer
+            startTimer();
+            
+            saveState();
+            
+            alert(`✅ Intervalle modifié !\n\n` +
+                  `Nouvel intervalle : ${newInterval} minutes\n` +
+                  `Prises/heure : ${state.intakesPerHour}\n` +
+                  `Quantité/prise : ${state.amountPerIntake} ml\n\n` +
+                  `Le timer a été réinitialisé.`);
+        }
+
+        // Calculate intake statistics for the last 60 minutes (rolling hour window)
+        // This function ensures manual entries are included and provides accurate
+        // real-time tracking regardless of when intakes were recorded
+        // It also respects phase changes by only counting intakes after hourStartTime
+        function calculateRollingHourStats() {
+            const now = Date.now();
+            const oneHourAgo = now - (60 * 60 * 1000); // 60 minutes ago
+            
+            // Determine the start boundary: use hourStartTime if it exists and is more recent
+            // This ensures we don't count Phase 1 intakes when in Phase 2
+            const startBoundary = state.hourStartTime ? Math.max(oneHourAgo, state.hourStartTime) : oneHourAgo;
+            
+            // Filter all entries (intakes and vomits) in the rolling hour window
+            const entriesInLastHour = state.history.filter(entry => {
+                const entryTime = new Date(entry.timestamp).getTime();
+                return entryTime >= startBoundary && entryTime <= now;
+            });
+            
+            // Separate intakes and vomits
+            const intakesInLastHour = entriesInLastHour.filter(e => e.type !== 'vomit');
+            const vomitsInLastHour = entriesInLastHour.filter(e => e.type === 'vomit');
+            
+            // Count intakes only (not vomits)
+            const intakeCount = intakesInLastHour.length;
+            
+            // Calculate total ml: intakes - vomits
+            const totalIntakeMl = intakesInLastHour.reduce((sum, intake) => sum + intake.amount, 0);
+            const totalVomitMl = vomitsInLastHour.reduce((sum, vomit) => sum + vomit.amount, 0);
+            const totalMl = totalIntakeMl - totalVomitMl;
+            
+            return {
+                count: intakeCount,
+                totalMl: totalMl,
+                totalIntakeMl: totalIntakeMl,
+                totalVomitMl: totalVomitMl,
+                intakes: intakesInLastHour,
+                vomits: vomitsInLastHour
+            };
+        }
+
+        function updateScheduleDisplay() {
+            // Calculate rolling hour stats (last 60 minutes)
+            const rollingStats = calculateRollingHourStats();
+            
+            // Update intake number display based on rolling hour
+            document.getElementById('intakeNumber').textContent = rollingStats.count + 1;
+            document.getElementById('totalIntakes').textContent = state.intakesPerHour;
+            document.getElementById('currentIntakeAmount').textContent = state.amountPerIntake;
+            document.getElementById('validateAmount').textContent = state.amountPerIntake;
+            
+            // Update progress bar for number of intakes
+            const progress = (rollingStats.count / state.intakesPerHour) * 100;
+            document.getElementById('hourProgress').style.width = Math.min(progress, 100) + '%';
+            
+            // Update total ml given in rolling hour
+            const hourlyTarget = state.currentPhase === 1 ? state.phase1Amount : state.phase2Amount;
+            const totalProgress = (rollingStats.totalMl / hourlyTarget) * 100;
+            
+            // Display total with vomit detail if any
+            let displayText = rollingStats.totalMl.toString();
+            if (rollingStats.totalVomitMl > 0) {
+                displayText = `${rollingStats.totalMl} (${rollingStats.totalIntakeMl}-${rollingStats.totalVomitMl})`;
+            }
+            
+            document.getElementById('totalGiven').textContent = displayText;
+            document.getElementById('totalTarget').textContent = hourlyTarget;
+            document.getElementById('totalProgress').style.width = Math.min(Math.max(totalProgress, 0), 100) + '%';
+            
+            // Update global progress
+            updateGlobalProgress();
+        }
+
+        function updateGlobalProgress() {
+            // Calculate intakes and vomits separately
+            const totalIntakes = state.history
+                .filter(item => item.type !== 'vomit')
+                .reduce((sum, intake) => sum + intake.amount, 0);
+            
+            const totalVomits = state.history
+                .filter(item => item.type === 'vomit')
+                .reduce((sum, vomit) => sum + vomit.amount, 0);
+            
+            // Net amount = intakes - vomits
+            const totalGivenGlobal = totalIntakes - totalVomits;
+            
+            // Calculate theoretical amount and phase details
+            let theoreticalAmount = 0;
+            let timeElapsedHours = 0;
+            let phase1Given = 0;
+            let phase1Theoretical = 0;
+            let phase2Given = 0;
+            let phase2Theoretical = 0;
+            
+            if (state.history.length > 0) {
+                // Find first intake (not vomit)
+                const intakes = state.history.filter(item => item.type !== 'vomit');
+                if (intakes.length > 0) {
+                    // Sort by timestamp to get the first one
+                    const sortedIntakes = [...intakes].sort((a, b) => {
+                        const timeA = new Date(a.timestamp).getTime();
+                        const timeB = new Date(b.timestamp).getTime();
+                        return timeA - timeB;
+                    });
+                    
+                    const firstIntake = sortedIntakes[0];
+                    const firstIntakeTime = new Date(firstIntake.timestamp).getTime();
+                    const now = Date.now();
+                    timeElapsedHours = (now - firstIntakeTime) / (1000 * 60 * 60);
+                    
+                    // Calculate theoretical based on protocol
+                    if (timeElapsedHours <= 4) {
+                        // Still in Phase 1
+                        phase1Theoretical = Math.round(state.phase1Amount * timeElapsedHours);
+                        phase2Theoretical = 0;
+                        theoreticalAmount = phase1Theoretical;
+                    } else {
+                        // In Phase 2
+                        phase1Theoretical = state.phase1Amount * 4; // Full Phase 1
+                        const phase2Hours = timeElapsedHours - 4;
+                        phase2Theoretical = Math.round(state.phase2Amount * phase2Hours);
+                        theoreticalAmount = phase1Theoretical + phase2Theoretical;
+                    }
+                    
+                    // Calculate actual given per phase
+                    // Attribute each intake to correct phase based on TIME elapsed, not stored phase field
+                    let phase1GivenTotal = 0;
+                    let phase2GivenTotal = 0;
+                    let phase1VomitsTotal = 0;
+                    let phase2VomitsTotal = 0;
+                    
+                    state.history.forEach(entry => {
+                        const entryTime = new Date(entry.timestamp).getTime();
+                        const hoursFromStart = (entryTime - firstIntakeTime) / (1000 * 60 * 60);
+                        
+                        // Determine which phase this entry belongs to based on TIME
+                        const inPhase1 = hoursFromStart < 4;
+                        
+                        if (entry.type === 'vomit') {
+                            if (inPhase1) {
+                                phase1VomitsTotal += entry.amount;
+                            } else {
+                                phase2VomitsTotal += entry.amount;
+                            }
+                        } else {
+                            if (inPhase1) {
+                                phase1GivenTotal += entry.amount;
+                            } else {
+                                phase2GivenTotal += entry.amount;
+                            }
+                        }
+                    });
+                    
+                    // Calculate net per phase (intakes - vomits)
+                    phase1Given = phase1GivenTotal - phase1VomitsTotal;
+                    phase2Given = phase2GivenTotal - phase2VomitsTotal;
+                }
+            }
+            
+            // Calculate deltas
+            const phase1Delta = phase1Given - phase1Theoretical;
+            const phase2Delta = phase2Given - phase2Theoretical;
+            const delta = totalGivenGlobal - theoreticalAmount;
+            
+            // Calculate target based on current phase (for progress bar)
+            let targetGlobal;
+            if (state.currentPhase === 1) {
+                // Phase 1: 4 hours
+                targetGlobal = state.phase1Amount * 4;
+            } else {
+                // Phase 2: Phase 1 complete + current progress in Phase 2
+                const phase1Total = state.phase1Amount * 4;
+                const phase2Total = state.phase2Amount * 20;
+                targetGlobal = phase1Total + phase2Total;
+            }
+            
+            const globalProgress = Math.min((totalGivenGlobal / targetGlobal) * 100, 100);
+            
+            // Display net amount (with vomit info if any)
+            let displayText = totalGivenGlobal.toString();
+            if (totalVomits > 0) {
+                displayText = `${totalGivenGlobal} (${totalIntakes}-${totalVomits})`;
+            }
+            
+            document.getElementById('globalTotalGiven').textContent = displayText;
+            document.getElementById('globalProgress').style.width = Math.max(globalProgress, 0) + '%';
+            document.getElementById('phaseNumber').textContent = state.currentPhase;
+            
+            // Update Phase 1 details
+            document.getElementById('phase1Given').textContent = phase1Given;
+            document.getElementById('phase1Theoretical').textContent = phase1Theoretical;
+            const phase1DeltaElement = document.getElementById('phase1Delta');
+            const phase1DeltaText = phase1Delta >= 0 ? `+${phase1Delta}` : `${phase1Delta}`;
+            phase1DeltaElement.textContent = phase1DeltaText;
+            
+            // Color for Phase 1 delta
+            if (phase1Delta >= 0) {
+                phase1DeltaElement.style.color = '#37b24d';
+            } else if (phase1Delta > -50) {
+                phase1DeltaElement.style.color = '#ffa94d';
+            } else {
+                phase1DeltaElement.style.color = '#ff6b6b';
+            }
+            
+            // Update Phase 2 details
+            document.getElementById('phase2Given').textContent = phase2Given;
+            document.getElementById('phase2Theoretical').textContent = phase2Theoretical;
+            const phase2DeltaElement = document.getElementById('phase2Delta');
+            const phase2DeltaText = phase2Delta >= 0 ? `+${phase2Delta}` : `${phase2Delta}`;
+            phase2DeltaElement.textContent = phase2DeltaText;
+            
+            // Color for Phase 2 delta
+            if (phase2Delta >= 0) {
+                phase2DeltaElement.style.color = '#37b24d';
+            } else if (phase2Delta > -50) {
+                phase2DeltaElement.style.color = '#ffa94d';
+            } else {
+                phase2DeltaElement.style.color = '#ff6b6b';
+            }
+            
+            // Update global theoretical display
+            document.getElementById('globalTheoretical').textContent = theoreticalAmount + ' ml';
+            
+            // Update global delta display with color
+            const deltaElement = document.getElementById('globalDelta');
+            const deltaText = delta >= 0 ? `+${delta}` : `${delta}`;
+            deltaElement.textContent = deltaText + ' ml';
+            
+            // Color based on delta
+            if (delta >= 0) {
+                deltaElement.style.color = '#37b24d'; // Green for positive
+            } else if (delta > -50) {
+                deltaElement.style.color = '#ffa94d'; // Orange for small negative
+            } else {
+                deltaElement.style.color = '#ff6b6b'; // Red for large negative
+            }
+            
+            // Show phase target
+            const phaseTarget = state.currentPhase === 1 
+                ? state.phase1Amount * 4 
+                : state.phase2Amount * 20;
+            document.getElementById('phaseTarget').textContent = phaseTarget;
+        }
+
+        // Timer functions
+        function updateTimerNotification() {
+            // Only create/update notification if permissions granted
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const minutes = Math.floor(state.timerSeconds / 60);
+                const seconds = state.timerSeconds % 60;
+                const timeDisplay = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Calculate current intake number
+                const rollingStats = calculateRollingHourStats();
+                const currentIntakeNum = rollingStats.count + 1;
+                
+                // Close previous notification if exists
+                if (activeTimerNotification) {
+                    activeTimerNotification.close();
+                }
+                
+                // Create new notification with updated time
+                activeTimerNotification = new Notification('⏱️ Prochaine prise', {
+                    body: `${timeDisplay} - ${state.amountPerIntake} ml\nPrise ${currentIntakeNum}/${state.intakesPerHour} cette heure`,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">💧</text></svg>',
+                    tag: 'rehydration-timer',
+                    silent: true,
+                    requireInteraction: false
+                });
+            }
+        }
+
+        function startTimer() {
+            if (state.isTimerRunning) return;
+            
+            state.isTimerRunning = true;
+            state.startTime = Date.now() - ((state.intakeInterval * 60 - state.timerSeconds) * 1000);
+            
+            // Create initial notification
+            updateTimerNotification();
+            
+            // Request wake lock to keep screen active (PWA support)
+            if ('wakeLock' in navigator) {
+                navigator.wakeLock.request('screen')
+                    .then(lock => {
+                        wakeLock = lock;
+                        console.log('Wake Lock activated');
+                        
+                        // Re-request wake lock if it's released (e.g., screen off)
+                        wakeLock.addEventListener('release', () => {
+                            console.log('Wake Lock released');
+                            if (state.isTimerRunning) {
+                                // Try to re-acquire if timer still running
+                                navigator.wakeLock.request('screen')
+                                    .then(newLock => { wakeLock = newLock; })
+                                    .catch(err => console.log('Wake Lock re-request failed:', err));
+                            }
+                        });
+                    })
+                    .catch(err => console.log('Wake Lock request failed:', err));
+            }
+            
+            state.timerInterval = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                state.timerSeconds = (state.intakeInterval * 60) - elapsed;
+                
+                if (state.timerSeconds <= 0) {
+                    state.timerSeconds = 0;
+                    stopTimer();
+                    notifyIntake();
+                }
+                
+                updateTimerDisplay();
+                
+                // Update notification every 10 seconds
+                if (elapsed % 10 === 0) {
+                    updateTimerNotification();
+                    updateScheduleDisplay();
+                }
+                
+                saveState();
+            }, 100);
+        }
+
+        function stopTimer() {
+            if (state.timerInterval) {
+                clearInterval(state.timerInterval);
+                state.timerInterval = null;
+            }
+            state.isTimerRunning = false;
+            
+            // Close timer notification when stopping
+            if (activeTimerNotification) {
+                activeTimerNotification.close();
+                activeTimerNotification = null;
+            }
+            
+            // Release wake lock when stopping timer
+            if (wakeLock) {
+                wakeLock.release()
+                    .then(() => {
+                        console.log('Wake Lock released');
+                        wakeLock = null;
+                    })
+                    .catch(err => console.log('Wake Lock release failed:', err));
+            }
+            
+            saveState();
+        }
+
+        function resumeTimer() {
+            startTimer();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(state.timerSeconds / 60);
+            const seconds = state.timerSeconds % 60;
+            const display = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('timerDisplay').textContent = display;
+            
+            const timerElement = document.getElementById('timerDisplay');
+            if (state.timerSeconds < 60) {
+                timerElement.style.color = '#ff6b6b';
+            } else if (state.timerSeconds < 180) {
+                timerElement.style.color = '#ffa94d';
+            } else {
+                timerElement.style.color = '#51cf66';
+            }
+            
+            // Calculate and display next intake time
+            const nextIntakeDate = new Date();
+            nextIntakeDate.setSeconds(nextIntakeDate.getSeconds() + state.timerSeconds);
+            const nextIntakeTimeStr = nextIntakeDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            const nextIntakeElement = document.getElementById('nextIntakeTime');
+            if (nextIntakeElement) {
+                nextIntakeElement.textContent = `Prochaine prise à ${nextIntakeTimeStr}`;
+            }
+        }
+
+        function notifyIntake() {
+            // Close timer notification before showing alarm
+            if (activeTimerNotification) {
+                activeTimerNotification.close();
+                activeTimerNotification = null;
+            }
+            
+            // Vibrate phone if supported
+            if ('vibrate' in navigator) {
+                navigator.vibrate([500, 250, 500, 250, 500]);
+            }
+            
+            // Multiple beeps
+            for (let i = 0; i < 5; i++) {
+                setTimeout(() => playAlert(), i * 400);
+            }
+            
+            // Calculate current intake number from rolling hour
+            const rollingStats = calculateRollingHourStats();
+            const currentIntakeNum = rollingStats.count + 1;
+            
+            // Browser notification with high priority
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const notification = new Notification('💧 RÉHYDRATATION - PRISE URGENTE', {
+                    body: `🔔 Donner ${state.amountPerIntake} ml MAINTENANT !\n\nPrise ${currentIntakeNum} sur ${state.intakesPerHour}`,
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">💧</text></svg>',
+                    requireInteraction: true,
+                    vibrate: [500, 250, 500, 250, 500],
+                    tag: 'rehydration-alert',
+                    renotify: true
+                });
+                
+                // Auto-close after 60 seconds to avoid clutter
+                setTimeout(() => notification.close(), 60000);
+            }
+            
+            // Alert dialog as fallback
+            alert(`⏰ C'EST L'HEURE DE LA PRISE !\n\n💧 Donner ${state.amountPerIntake} ml MAINTENANT\n\nPrise ${currentIntakeNum} sur ${state.intakesPerHour}`);
+        }
+
+        function playAlert() {
+            try {
+                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = 1000; // Higher frequency for urgency
+                oscillator.type = 'square'; // More piercing sound
+                
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.3);
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+
+        function testNotification() {
+            // Vibrate
+            if ('vibrate' in navigator) {
+                navigator.vibrate([500, 250, 500]);
+            }
+            
+            // Play sound
+            playAlert();
+            setTimeout(() => playAlert(), 400);
+            
+            // Show notification
+            if ('Notification' in window) {
+                if (Notification.permission === 'granted') {
+                    new Notification('💧 Test de notification', {
+                        body: 'Les notifications fonctionnent ! Vous serez alerté à chaque prise.',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="75" font-size="75">💧</text></svg>',
+                        vibrate: [500, 250, 500]
+                    });
+                } else if (Notification.permission === 'default') {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            new Notification('💧 Test de notification', {
+                                body: 'Les notifications sont maintenant activées !',
+                                vibrate: [500, 250, 500]
+                            });
+                        } else {
+                            alert('❌ Permissions de notification refusées.\n\nVeuillez les activer dans les paramètres du navigateur.');
+                        }
+                    });
+                } else {
+                    alert('❌ Permissions de notification refusées.\n\nVeuillez les activer dans les paramètres du navigateur.');
+                }
+            } else {
+                alert('⚠️ Les notifications ne sont pas supportées sur ce navigateur.');
+            }
+        }
+
+        // Manual entry modal
+        function showManualEntryModal() {
+            closeMenu();
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; overflow: auto; padding: 20px;';
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'background: white; border-radius: 15px; padding: 25px; max-width: 400px; margin: 0 auto;';
+            
+            const title = document.createElement('h3');
+            title.textContent = '✏️ Ajouter une prise manuelle';
+            title.style.cssText = 'color: #667eea; margin-bottom: 20px; font-size: 20px;';
+            
+            const form = document.createElement('div');
+            
+            // Datetime input
+            const datetimeLabel = document.createElement('label');
+            datetimeLabel.textContent = 'Date et heure :';
+            datetimeLabel.style.cssText = 'display: block; font-weight: 600; margin-bottom: 8px; color: #333;';
+            
+            const datetimeInput = document.createElement('input');
+            datetimeInput.type = 'datetime-local';
+            datetimeInput.style.cssText = 'width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 20px;';
+            
+            // Set default to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            datetimeInput.value = now.toISOString().slice(0, 16);
+            
+            // Amount input
+            const amountLabel = document.createElement('label');
+            amountLabel.textContent = 'Quantité (ml) :';
+            amountLabel.style.cssText = 'display: block; font-weight: 600; margin-bottom: 8px; color: #333;';
+            
+            const amountInput = document.createElement('input');
+            amountInput.type = 'number';
+            amountInput.min = '1';
+            amountInput.max = '500';
+            amountInput.placeholder = 'Ex: 50';
+            amountInput.style.cssText = 'width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 20px;';
+            
+            // Set default amount if protocol is started
+            if (state.amountPerIntake > 0) {
+                amountInput.value = state.amountPerIntake;
+            }
+            
+            // Buttons
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'display: flex; gap: 10px; margin-top: 20px;';
+            
+            const addButton = document.createElement('button');
+            addButton.textContent = '✅ Ajouter';
+            addButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            addButton.onclick = () => {
+                const datetime = datetimeInput.value;
+                const amount = parseInt(amountInput.value);
+                
+                if (!datetime) {
+                    alert('⚠️ Veuillez saisir une date et heure');
+                    return;
+                }
+                
+                if (!amount || amount < 1) {
+                    alert('⚠️ Veuillez saisir une quantité valide');
+                    return;
+                }
+                
+                addManualIntake(datetime, amount);
+                document.body.removeChild(modal);
+            };
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = '❌ Annuler';
+            cancelButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            cancelButton.onclick = () => document.body.removeChild(modal);
+            
+            // Build form
+            form.appendChild(datetimeLabel);
+            form.appendChild(datetimeInput);
+            form.appendChild(amountLabel);
+            form.appendChild(amountInput);
+            
+            buttonContainer.appendChild(addButton);
+            buttonContainer.appendChild(cancelButton);
+            
+            content.appendChild(title);
+            content.appendChild(form);
+            content.appendChild(buttonContainer);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        }
+
+        function showVomitEntryModal() {
+            closeMenu();
+            
+            // Create modal
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; overflow: auto; padding: 20px;';
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'background: white; border-radius: 15px; padding: 25px; max-width: 400px; margin: 0 auto;';
+            
+            const title = document.createElement('h3');
+            title.textContent = '🤮 Enregistrer un vomissement';
+            title.style.cssText = 'color: #c92a2a; margin-bottom: 20px; font-size: 20px;';
+            
+            const form = document.createElement('div');
+            
+            // Datetime input
+            const datetimeLabel = document.createElement('label');
+            datetimeLabel.textContent = 'Date et heure :';
+            datetimeLabel.style.cssText = 'display: block; font-weight: 600; margin-bottom: 8px; color: #333;';
+            
+            const datetimeInput = document.createElement('input');
+            datetimeInput.type = 'datetime-local';
+            datetimeInput.style.cssText = 'width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 20px;';
+            
+            // Set default to now
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            datetimeInput.value = now.toISOString().slice(0, 16);
+            
+            // Amount input
+            const amountLabel = document.createElement('label');
+            amountLabel.textContent = 'Quantité vomie (ml) :';
+            amountLabel.style.cssText = 'display: block; font-weight: 600; margin-bottom: 8px; color: #333;';
+            
+            const amountInput = document.createElement('input');
+            amountInput.type = 'number';
+            amountInput.min = '1';
+            amountInput.max = '500';
+            amountInput.placeholder = 'Ex: 30';
+            amountInput.style.cssText = 'width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 20px;';
+            
+            // Buttons
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'display: flex; gap: 10px; margin-top: 20px;';
+            
+            const addButton = document.createElement('button');
+            addButton.textContent = '✅ Enregistrer';
+            addButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            addButton.onclick = () => {
+                const datetime = datetimeInput.value;
+                const amount = parseInt(amountInput.value);
+                
+                if (!datetime) {
+                    alert('⚠️ Veuillez saisir une date et heure');
+                    return;
+                }
+                
+                if (!amount || amount < 1) {
+                    alert('⚠️ Veuillez saisir une quantité valide');
+                    return;
+                }
+                
+                addVomitEntry(datetime, amount);
+                document.body.removeChild(modal);
+            };
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = '❌ Annuler';
+            cancelButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #868e96 0%, #495057 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            cancelButton.onclick = () => document.body.removeChild(modal);
+            
+            // Build form
+            form.appendChild(datetimeLabel);
+            form.appendChild(datetimeInput);
+            form.appendChild(amountLabel);
+            form.appendChild(amountInput);
+            
+            buttonContainer.appendChild(addButton);
+            buttonContainer.appendChild(cancelButton);
+            
+            content.appendChild(title);
+            content.appendChild(form);
+            content.appendChild(buttonContainer);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        }
+
+        function addVomitEntry(datetime, amount) {
+            const vomitDate = new Date(datetime);
+            const timeString = vomitDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            
+            // Create vomit entry
+            const vomitEntry = {
+                timestamp: vomitDate.toISOString(),
+                time: timeString,
+                amount: amount,
+                type: 'vomit'
+            };
+            
+            // Add to history
+            state.history.push(vomitEntry);
+            
+            // Refresh UI to maintain sorted order
+            refreshHistoryDisplay();
+            updateGlobalProgress();
+            saveState();
+            
+            alert(`🤮 Vomissement enregistré\n\n${timeString} - ${amount} ml\n\nLe calcul global a été ajusté.`);
+        }
+
+        function addManualIntake(datetime, amount) {
+            const intakeDate = new Date(datetime);
+            const timeString = intakeDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            
+            // Create manual intake entry
+            const manualIntake = {
+                timestamp: intakeDate.toISOString(),
+                time: timeString,
+                amount: amount,
+                type: 'manual',
+                intakeNumber: state.history.length + 1
+            };
+            
+            // Add to history
+            state.history.push(manualIntake);
+            
+            // Recalculate rolling hour stats to update state
+            const rollingStats = calculateRollingHourStats();
+            state.currentIntakeNumber = rollingStats.count;
+            state.totalIntakesThisHour = rollingStats.count;
+            
+            // Refresh UI to maintain sorted order
+            refreshHistoryDisplay();
+            updateGlobalProgress();
+            
+            // Always update schedule display to refresh counters (even if hidden)
+            // When protocol starts, counters will be correct
+            updateScheduleDisplay();
+            
+            saveState();
+            
+            alert(`✅ Prise ajoutée avec succès !\n\n${timeString} - ${amount} ml\n\nPrises dans la dernière heure : ${rollingStats.count}/${state.intakesPerHour}`);
+        }
+
+        // Validate intake
+        function validateIntake() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+            
+            // Calculate sequential intake number based on total history
+            const sequentialNumber = state.history.length + 1;
+            
+            const intake = {
+                time: timeString,
+                amount: state.amountPerIntake,
+                phase: state.currentPhase,
+                intakeNumber: sequentialNumber,
+                totalIntakes: state.intakesPerHour,
+                timestamp: now.toISOString()
+            };
+            
+            state.history.push(intake);
+            
+            // Recalculate rolling hour stats to update state
+            const rollingStats = calculateRollingHourStats();
+            state.currentIntakeNumber = rollingStats.count;
+            state.totalIntakesThisHour = rollingStats.count;
+            
+            // Refresh UI to maintain sorted order
+            refreshHistoryDisplay();
+            
+            // Update display with rolling hour stats
+            updateScheduleDisplay();
+            
+            // Check if protocol is complete before continuing
+            if (checkProtocolCompletion()) {
+                saveState();
+                return; // Exit early if protocol completed
+            }
+            
+            // Check if we've reached the target for this protocol hour
+            if (rollingStats.count >= state.intakesPerHour) {
+                completeHour();
+            } else {
+                // Reset timer for next intake
+                state.timerSeconds = state.intakeInterval * 60;
+                startTimer();
+            }
+            
+            saveState();
+        }
+
+        function completeHour() {
+            stopTimer();
+            
+            const hourlyAmount = state.currentPhase === 1 ? state.phase1Amount : state.phase2Amount;
+            const rollingStats = calculateRollingHourStats();
+            alert(`✅ Heure terminée !\n\nTotal donné : ${rollingStats.totalMl} ml / ${hourlyAmount} ml`);
+            
+            // Reset hour start time for next protocol hour
+            state.hourStartTime = Date.now();
+            state.timerSeconds = state.intakeInterval * 60;
+            
+            updateScheduleDisplay();
+            
+            // Check if protocol is complete (24h elapsed or target volume reached)
+            if (checkProtocolCompletion()) {
+                return; // Exit early if protocol completed
+            }
+            
+            // Count how many complete hours have been done in Phase 1
+            // A complete hour = intakesPerHour consecutive intakes
+            let hoursCompleted = 0;
+            if (state.currentPhase === 1 && state.history.length > 0) {
+                // Count groups of intakesPerHour
+                hoursCompleted = Math.floor(state.history.length / state.intakesPerHour);
+                
+                if (hoursCompleted >= 4) {
+                    if (confirm('Phase 1 terminée (4 heures).\n\nPasser à la Phase 2 ?')) {
+                        state.currentPhase = 2;
+                        
+                        // Reset hour start time to begin fresh counting in Phase 2
+                        state.hourStartTime = Date.now();
+                        
+                        updateProtocolDisplay();
+                        updateSchedule();
+                        updateScheduleDisplay();
+                        updateGlobalProgress();
+                    }
+                }
+            }
+            
+            startTimer();
+            saveState();
+        }
+
+        function checkProtocolCompletion() {
+            if (state.history.length === 0) return false;
+            
+            // Get first intake time to calculate elapsed time
+            const intakes = state.history.filter(item => item.type !== 'vomit');
+            if (intakes.length === 0) return false;
+            
+            const sortedIntakes = [...intakes].sort((a, b) => {
+                return new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime();
+            });
+            
+            const firstIntakeTime = new Date(sortedIntakes[0].timestamp).getTime();
+            const now = Date.now();
+            const hoursElapsed = (now - firstIntakeTime) / (1000 * 60 * 60);
+            
+            // Calculate total given (net of vomits)
+            let totalGiven = 0;
+            let totalVomits = 0;
+            state.history.forEach(entry => {
+                if (entry.type === 'vomit') {
+                    totalVomits += entry.amount;
+                } else {
+                    totalGiven += entry.amount;
+                }
+            });
+            totalGiven -= totalVomits;
+            
+            // Check if 24h elapsed OR target volume reached
+            const targetVolume = state.totalVolume24h;
+            const twentyFourHoursElapsed = hoursElapsed >= 24;
+            const targetReached = totalGiven >= targetVolume;
+            
+            if (twentyFourHoursElapsed || targetReached) {
+                showProtocolCompletionModal(totalGiven, targetVolume, hoursElapsed);
+                return true;
+            }
+            
+            return false;
+        }
+
+        function showProtocolCompletionModal(totalGiven, targetVolume, hoursElapsed) {
+            stopTimer();
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); border-radius: 20px; padding: 30px; max-width: 500px; color: white; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5);';
+            
+            const title = document.createElement('h2');
+            title.style.cssText = 'font-size: 32px; margin-bottom: 20px;';
+            title.textContent = '🎉 PROTOCOLE TERMINÉ !';
+            
+            const stats = document.createElement('div');
+            stats.style.cssText = 'background: rgba(255,255,255,0.2); border-radius: 15px; padding: 20px; margin: 20px 0; font-size: 18px;';
+            
+            const percentage = Math.round((totalGiven / targetVolume) * 100);
+            const hoursText = Math.floor(hoursElapsed) + 'h' + Math.round((hoursElapsed % 1) * 60).toString().padStart(2, '0');
+            
+            stats.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <strong style="font-size: 24px;">${totalGiven} ml</strong> / ${targetVolume} ml
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>${percentage}%</strong> de l'objectif atteint
+                </div>
+                <div>
+                    Durée totale : <strong>${hoursText}</strong>
+                </div>
+            `;
+            
+            const message = document.createElement('p');
+            message.style.cssText = 'font-size: 16px; line-height: 1.6; margin: 20px 0;';
+            
+            if (percentage >= 100) {
+                message.innerHTML = '✅ <strong>Félicitations !</strong><br>La réhydratation est complète selon le protocole Picolite.';
+            } else if (percentage >= 80) {
+                message.innerHTML = '👍 <strong>Bon résultat !</strong><br>L\'objectif est presque atteint. Continuez à surveiller l\'enfant.';
+            } else {
+                message.innerHTML = '⚠️ <strong>Objectif non atteint</strong><br>Consultez un médecin si l\'enfant présente des signes de déshydratation.';
+            }
+            
+            const buttonsDiv = document.createElement('div');
+            buttonsDiv.style.cssText = 'display: flex; gap: 10px; margin-top: 25px; flex-wrap: wrap;';
+            
+            // Export button
+            const exportBtn = document.createElement('button');
+            exportBtn.textContent = '📤 Exporter les données';
+            exportBtn.style.cssText = 'flex: 1; min-width: 150px; padding: 15px; background: white; color: #37b24d; border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            exportBtn.onclick = () => {
+                modal.remove();
+                exportData();
+            };
+            
+            // View history button
+            const historyBtn = document.createElement('button');
+            historyBtn.textContent = '📋 Voir l\'historique';
+            historyBtn.style.cssText = 'flex: 1; min-width: 150px; padding: 15px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            historyBtn.onclick = () => {
+                modal.remove();
+                hideActiveSections();
+            };
+            
+            // New protocol button
+            const restartBtn = document.createElement('button');
+            restartBtn.textContent = '🔄 Nouveau protocole';
+            restartBtn.style.cssText = 'width: 100%; padding: 15px; margin-top: 10px; background: rgba(255,255,255,0.2); color: white; border: 2px solid white; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            restartBtn.onclick = () => {
+                if (confirm('⚠️ Êtes-vous sûr de vouloir recommencer un nouveau protocole ?\n\nCela va archiver les données actuelles.')) {
+                    modal.remove();
+                    resetProtocol();
+                }
+            };
+            
+            buttonsDiv.appendChild(exportBtn);
+            buttonsDiv.appendChild(historyBtn);
+            
+            content.appendChild(title);
+            content.appendChild(stats);
+            content.appendChild(message);
+            content.appendChild(buttonsDiv);
+            content.appendChild(restartBtn);
+            
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        }
+
+        function addHistoryItem(intake) {
+            const historyList = document.getElementById('historyList');
+            const item = document.createElement('div');
+            item.className = 'history-item';
+            item.style.cursor = 'pointer';
+            
+            // Add click handler for edit/delete
+            item.onclick = () => showEditDeleteModal(intake);
+            
+            // Check if it's a vomit entry
+            if (intake.type === 'vomit') {
+                item.style.background = '#fff5f5';
+                item.style.borderLeft = '4px solid #ff6b6b';
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="history-time">${intake.time}</span>
+                        <span style="margin-left: 10px; font-size: 12px; color: #c92a2a; font-weight: 600;">
+                            🤮 Vomissement
+                        </span>
+                    </div>
+                    <span class="history-amount" style="color: #c92a2a; font-weight: 600;">-${intake.amount} ml</span>
+                `;
+            } else {
+                // Handle intake entries (old and new formats)
+                let intakeInfo = '';
+                if (intake.intakeNumber) {
+                    intakeInfo = `Prise #${intake.intakeNumber}`;
+                } else if (intake.type === 'fraction' && intake.fraction) {
+                    intakeInfo = `Prise #${intake.fraction}`;
+                } else {
+                    intakeInfo = 'Prise validée';
+                }
+                
+                item.innerHTML = `
+                    <div>
+                        <span class="history-time">${intake.time}</span>
+                        <span style="margin-left: 10px; font-size: 12px; color: #999;">
+                            ${intakeInfo}
+                        </span>
+                    </div>
+                    <span class="history-amount">${intake.amount} ml</span>
+                `;
+            }
+            
+            // Use append since history is already sorted
+            historyList.appendChild(item);
+        }
+
+        function showEditDeleteModal(intake) {
+            // Create modal
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; overflow: auto; padding: 20px;';
+            
+            const content = document.createElement('div');
+            content.style.cssText = 'background: white; border-radius: 15px; padding: 25px; max-width: 400px; margin: 0 auto;';
+            
+            const title = document.createElement('h3');
+            const isVomit = intake.type === 'vomit';
+            title.textContent = isVomit ? '🤮 Éditer vomissement' : '💧 Éditer prise';
+            title.style.cssText = `color: ${isVomit ? '#c92a2a' : '#667eea'}; margin-bottom: 20px; font-size: 20px;`;
+            
+            const form = document.createElement('div');
+            
+            // Datetime input
+            const datetimeLabel = document.createElement('label');
+            datetimeLabel.textContent = 'Date et heure :';
+            datetimeLabel.style.cssText = 'display: block; font-weight: 600; margin-bottom: 8px; color: #333;';
+            
+            const datetimeInput = document.createElement('input');
+            datetimeInput.type = 'datetime-local';
+            datetimeInput.style.cssText = 'width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 20px;';
+            
+            // Set current value
+            const intakeDate = new Date(intake.timestamp);
+            intakeDate.setMinutes(intakeDate.getMinutes() - intakeDate.getTimezoneOffset());
+            datetimeInput.value = intakeDate.toISOString().slice(0, 16);
+            
+            // Amount input
+            const amountLabel = document.createElement('label');
+            amountLabel.textContent = isVomit ? 'Quantité vomie (ml) :' : 'Quantité (ml) :';
+            amountLabel.style.cssText = 'display: block; font-weight: 600; margin-bottom: 8px; color: #333;';
+            
+            const amountInput = document.createElement('input');
+            amountInput.type = 'number';
+            amountInput.min = '1';
+            amountInput.max = '500';
+            amountInput.value = intake.amount;
+            amountInput.style.cssText = 'width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; margin-bottom: 20px;';
+            
+            // Buttons
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.cssText = 'display: flex; gap: 10px; margin-top: 20px;';
+            
+            const saveButton = document.createElement('button');
+            saveButton.textContent = '💾 Enregistrer';
+            saveButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            saveButton.onclick = () => {
+                const newDatetime = datetimeInput.value;
+                const newAmount = parseInt(amountInput.value);
+                
+                if (!newDatetime) {
+                    alert('⚠️ Veuillez saisir une date et heure');
+                    return;
+                }
+                
+                if (!newAmount || newAmount < 1) {
+                    alert('⚠️ Veuillez saisir une quantité valide');
+                    return;
+                }
+                
+                updateHistoryEntry(intake, newDatetime, newAmount);
+                document.body.removeChild(modal);
+            };
+            
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = '🗑️ Supprimer';
+            deleteButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            deleteButton.onclick = () => {
+                if (confirm(`⚠️ Supprimer cette ${isVomit ? 'entrée de vomissement' : 'prise'} ?\n\nCette action est irréversible.`)) {
+                    deleteHistoryEntry(intake);
+                    document.body.removeChild(modal);
+                }
+            };
+            
+            const cancelButton = document.createElement('button');
+            cancelButton.textContent = '❌ Annuler';
+            cancelButton.style.cssText = 'flex: 1; padding: 14px; background: linear-gradient(135deg, #868e96 0%, #495057 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer;';
+            cancelButton.onclick = () => document.body.removeChild(modal);
+            
+            // Build form
+            form.appendChild(datetimeLabel);
+            form.appendChild(datetimeInput);
+            form.appendChild(amountLabel);
+            form.appendChild(amountInput);
+            
+            buttonContainer.appendChild(saveButton);
+            buttonContainer.appendChild(deleteButton);
+            buttonContainer.appendChild(cancelButton);
+            
+            content.appendChild(title);
+            content.appendChild(form);
+            content.appendChild(buttonContainer);
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+        }
+
+        function updateHistoryEntry(oldEntry, newDatetime, newAmount) {
+            // Find the entry in history
+            const index = state.history.findIndex(item => item.timestamp === oldEntry.timestamp);
+            
+            if (index !== -1) {
+                const newDate = new Date(newDatetime);
+                const timeString = newDate.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+                
+                // Check if we're modifying the most recent entry before update
+                const oldMostRecent = getMostRecentEntry();
+                const isModifyingMostRecent = oldMostRecent && oldMostRecent.timestamp === oldEntry.timestamp;
+                
+                // Update the entry
+                state.history[index].timestamp = newDate.toISOString();
+                state.history[index].time = timeString;
+                state.history[index].amount = newAmount;
+                
+                // Check if this entry is now the most recent after update
+                const newMostRecent = getMostRecentEntry();
+                const isNowMostRecent = newMostRecent && newMostRecent.timestamp === state.history[index].timestamp;
+                
+                // Recalculate timer if we modified or created a new most recent entry
+                // and if timer section is visible (protocol is active)
+                if ((isModifyingMostRecent || isNowMostRecent) && 
+                    !document.getElementById('currentIntakeSection').classList.contains('hidden')) {
+                    
+                    const mostRecent = getMostRecentEntry();
+                    const lastIntakeTime = new Date(mostRecent.timestamp).getTime();
+                    const now = Date.now();
+                    const timeSinceLastIntake = Math.floor((now - lastIntakeTime) / 1000);
+                    
+                    const intervalSeconds = state.intakeInterval * 60;
+                    const remainingSeconds = intervalSeconds - timeSinceLastIntake;
+                    
+                    if (remainingSeconds > 0) {
+                        state.timerSeconds = remainingSeconds;
+                    } else {
+                        state.timerSeconds = 0;
+                    }
+                    
+                    updateTimerDisplay();
+                }
+                
+                // Refresh UI
+                refreshHistoryDisplay();
+                updateGlobalProgress();
+                if (!document.getElementById('scheduleSection').classList.contains('hidden')) {
+                    updateScheduleDisplay();
+                }
+                saveState();
+                
+                alert('✅ Entrée mise à jour avec succès !');
+            }
+        }
+
+        function deleteHistoryEntry(entry) {
+            // Find and remove the entry
+            const index = state.history.findIndex(item => item.timestamp === entry.timestamp);
+            
+            if (index !== -1) {
+                // Check if we're deleting the most recent entry
+                const oldMostRecent = getMostRecentEntry();
+                const isDeletingMostRecent = oldMostRecent && oldMostRecent.timestamp === entry.timestamp;
+                
+                state.history.splice(index, 1);
+                
+                // Recalculate timer if we deleted the most recent entry
+                // and if timer section is visible (protocol is active)
+                if (isDeletingMostRecent && 
+                    !document.getElementById('currentIntakeSection').classList.contains('hidden') &&
+                    state.history.length > 0) {
+                    
+                    const mostRecent = getMostRecentEntry();
+                    if (mostRecent) {
+                        const lastIntakeTime = new Date(mostRecent.timestamp).getTime();
+                        const now = Date.now();
+                        const timeSinceLastIntake = Math.floor((now - lastIntakeTime) / 1000);
+                        
+                        const intervalSeconds = state.intakeInterval * 60;
+                        const remainingSeconds = intervalSeconds - timeSinceLastIntake;
+                        
+                        if (remainingSeconds > 0) {
+                            state.timerSeconds = remainingSeconds;
+                        } else {
+                            state.timerSeconds = 0;
+                        }
+                        
+                        updateTimerDisplay();
+                    }
+                }
+                
+                // Refresh UI
+                refreshHistoryDisplay();
+                updateGlobalProgress();
+                if (!document.getElementById('scheduleSection').classList.contains('hidden')) {
+                    updateScheduleDisplay();
+                }
+                saveState();
+                
+                alert('✅ Entrée supprimée avec succès !');
+            }
+        }
+
+        function refreshHistoryDisplay() {
+            // Clear and repopulate history
+            const historyList = document.getElementById('historyList');
+            historyList.innerHTML = '';
+            
+            // Sort by timestamp descending
+            const sortedHistory = [...state.history].sort((a, b) => {
+                const timeA = new Date(a.timestamp).getTime();
+                const timeB = new Date(b.timestamp).getTime();
+                return timeB - timeA;
+            });
+            
+            // Find first intake to calculate phases dynamically
+            const intakes = state.history.filter(item => item.type !== 'vomit');
+            let firstIntakeTime = null;
+            if (intakes.length > 0) {
+                const sortedIntakes = [...intakes].sort((a, b) => {
+                    const timeA = new Date(a.timestamp).getTime();
+                    const timeB = new Date(b.timestamp).getTime();
+                    return timeA - timeB;
+                });
+                firstIntakeTime = new Date(sortedIntakes[0].timestamp).getTime();
+            }
+            
+            let lastCalculatedPhase = null;
+            sortedHistory.forEach((intake) => {
+                // Calculate which phase this entry should be in based on TIME
+                // IMPORTANT: Calculate for BOTH intakes AND vomits to properly detect phase changes
+                let calculatedPhase = null;
+                if (firstIntakeTime) {
+                    const entryTime = new Date(intake.timestamp).getTime();
+                    const hoursFromStart = (entryTime - firstIntakeTime) / (1000 * 60 * 60);
+                    calculatedPhase = hoursFromStart < 4 ? 1 : 2;
+                }
+                
+                // Add phase separator if phase changes (based on calculated phase, not stored phase)
+                if (calculatedPhase && lastCalculatedPhase && calculatedPhase !== lastCalculatedPhase) {
+                    const separator = document.createElement('div');
+                    separator.style.cssText = 'margin: 15px 0; padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; text-align: center; color: white; font-weight: 600; font-size: 14px;';
+                    separator.textContent = `━━━ Passage Phase ${lastCalculatedPhase} → Phase ${calculatedPhase} (Théorique: +4h) ━━━`;
+                    historyList.appendChild(separator);
+                }
+                
+                addHistoryItem(intake);
+                
+                // Update lastCalculatedPhase for next iteration (for ALL entries, including vomits)
+                if (calculatedPhase) {
+                    lastCalculatedPhase = calculatedPhase;
+                }
+            });
+        }
+
+        function resetProtocol() {
+            if (confirm('⚠️ ATTENTION - Reprendre de zéro\n\nCela va EFFACER toutes les données :\n• Historique complet\n• Timer en cours\n• Toute la progression\n\nVoulez-vous vraiment tout réinitialiser ?')) {
+                // Stop timer completely
+                stopTimer();
+                
+                // Clear localStorage
+                clearState();
+                
+                // Reset state to initial values
+                state = {
+                    weight: 0,
+                    phase1Amount: 0,
+                    phase2Amount: 0,
+                    totalVolume24h: 0,
+                    sachetsCount: 0,
+                    currentPhase: 1,
+                    intakeInterval: 15,
+                    intakesPerHour: 4,
+                    amountPerIntake: 0,
+                    currentIntakeNumber: 0,
+                    totalIntakesThisHour: 0,
+                    timerInterval: null,
+                    timerSeconds: 900,
+                    isTimerRunning: false,
+                    startTime: null,
+                    hourStartTime: null,
+                    history: []
+                };
+                
+                // Hide all sections and show only weight input
+                document.getElementById('weightSection').classList.remove('hidden');
+                document.getElementById('protocolInfo').classList.add('hidden');
+                document.getElementById('scheduleSection').classList.add('hidden');
+                document.getElementById('currentIntakeSection').classList.add('hidden');
+                document.getElementById('historySection').classList.add('hidden');
+                
+                // Clear input fields and history list
+                document.getElementById('childWeight').value = '';
+                document.getElementById('historyList').innerHTML = '';
+                
+                alert('✅ Application réinitialisée\n\nVous pouvez recommencer avec un nouveau poids.');
+            }
+        }
+
+        function showDebugInfo() {
+            const savedData = localStorage.getItem('rehydratationData');
+            
+            if (!savedData) {
+                alert('Aucune donnée sauvegardée');
+                return;
+            }
+            
+            try {
+                const data = JSON.parse(savedData);
+                const debugInfo = {
+                    weight: data.weight,
+                    currentPhase: data.currentPhase,
+                    hourStartTime: data.hourStartTime ? new Date(data.hourStartTime).toLocaleString('fr-FR') : 'null',
+                    currentIntakeNumber: data.currentIntakeNumber,
+                    totalIntakesThisHour: data.totalIntakesThisHour,
+                    intakeInterval: data.intakeInterval,
+                    amountPerIntake: data.amountPerIntake,
+                    historyCount: data.history ? data.history.length : 0,
+                    lastIntake: data.history && data.history[0] ? new Date(data.history[0].timestamp).toLocaleString('fr-FR') : 'aucune',
+                    timerSeconds: data.timerSeconds
+                };
+                
+                let message = '📊 DONNÉES DEBUG\n\n';
+                message += `Poids: ${debugInfo.weight} kg\n`;
+                message += `Phase: ${debugInfo.currentPhase}\n`;
+                message += `Heure démarrée: ${debugInfo.hourStartTime}\n`;
+                message += `Prise en cours: ${debugInfo.currentIntakeNumber + 1}\n`;
+                message += `Total prises cette heure: ${debugInfo.totalIntakesThisHour}\n`;
+                message += `Intervalle: ${debugInfo.intakeInterval} min\n`;
+                message += `Quantité/prise: ${debugInfo.amountPerIntake} ml\n`;
+                message += `Historique: ${debugInfo.historyCount} prises\n`;
+                message += `Dernière prise: ${debugInfo.lastIntake}\n`;
+                message += `Timer: ${debugInfo.timerSeconds}s\n\n`;
+                
+                if (data.history && data.history.length > 0) {
+                    message += '📋 HISTORIQUE (5 dernières):\n';
+                    data.history.slice(0, 5).forEach((intake, i) => {
+                        let intakeInfo = '';
+                        if (intake.intakeNumber) {
+                            intakeInfo = `prise #${intake.intakeNumber}`;
+                        } else if (intake.type === 'fraction' && intake.fraction) {
+                            intakeInfo = `prise #${intake.fraction}`;
+                        } else {
+                            intakeInfo = 'prise validée';
+                        }
+                        message += `${i+1}. ${intake.time} - ${intake.amount}ml (${intakeInfo})\n`;
+                    });
+                    message += '\n';
+                }
+                
+                message += '---\nDATA COMPLÈTE (à copier):\n\n';
+                message += JSON.stringify(data, null, 2);
+                
+                // Create a modal to display the info
+                const modal = document.createElement('div');
+                modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 10000; overflow: auto; padding: 20px;';
+                
+                const content = document.createElement('div');
+                content.style.cssText = 'background: white; border-radius: 15px; padding: 20px; max-width: 600px; margin: 0 auto;';
+                
+                const title = document.createElement('h3');
+                title.textContent = '🔍 Données de debug';
+                title.style.marginBottom = '15px';
+                
+                const textarea = document.createElement('textarea');
+                textarea.value = message;
+                textarea.style.cssText = 'width: 100%; height: 400px; font-family: monospace; font-size: 12px; padding: 10px; border: 2px solid #e0e0e0; border-radius: 8px;';
+                textarea.readOnly = true;
+                
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.cssText = 'display: flex; gap: 10px; margin-top: 15px;';
+                
+                const copyButton = document.createElement('button');
+                copyButton.textContent = '📋 Copier';
+                copyButton.style.cssText = 'flex: 1; padding: 12px; background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600;';
+                copyButton.onclick = () => {
+                    textarea.select();
+                    document.execCommand('copy');
+                    copyButton.textContent = '✅ Copié !';
+                    setTimeout(() => copyButton.textContent = '📋 Copier', 2000);
+                };
+                
+                const closeButton = document.createElement('button');
+                closeButton.textContent = '❌ Fermer';
+                closeButton.style.cssText = 'flex: 1; padding: 12px; background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600;';
+                closeButton.onclick = () => document.body.removeChild(modal);
+                
+                buttonContainer.appendChild(copyButton);
+                buttonContainer.appendChild(closeButton);
+                
+                content.appendChild(title);
+                content.appendChild(textarea);
+                content.appendChild(buttonContainer);
+                modal.appendChild(content);
+                document.body.appendChild(modal);
+                
+            } catch (e) {
+                alert('Erreur lors de la lecture des données: ' + e.message);
+            }
+        }
+
+        // Initialize
+        window.addEventListener('DOMContentLoaded', () => {
+            loadState();
+            
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission();
+            }
+            
+            // Register service worker for PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            }
+            
+            // Update global progress every 30 seconds to refresh theoretical and delta
+            setInterval(() => {
+                if (state.history.length > 0 && !document.getElementById('protocolInfo').classList.contains('hidden')) {
+                    updateGlobalProgress();
+                }
+            }, 30000); // Every 30 seconds
+        });
+
+        // Handle app visibility change (PWA wake-up)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && state.isTimerRunning) {
+                // App came back to foreground and timer should be running
+                // Recalculate actual time remaining based on elapsed real time
+                const elapsed = Math.floor((Date.now() - state.startTime) / 1000);
+                const newTimerSeconds = (state.intakeInterval * 60) - elapsed;
+                
+                if (newTimerSeconds <= 0) {
+                    // Timer expired while app was in background
+                    state.timerSeconds = 0;
+                    stopTimer();
+                    notifyIntake();
+                } else {
+                    // Update timer with actual remaining time
+                    state.timerSeconds = newTimerSeconds;
+                    updateTimerDisplay();
+                    updateTimerNotification();
+                    
+                    // If timer wasn't running (paused by system), restart it
+                    if (!state.timerInterval) {
+                        startTimer();
+                    }
+                }
+                
+                // Also update schedule and progress
+                updateScheduleDisplay();
+                updateGlobalProgress();
+            }
+        });
+    </script>
+</body>
+</html>
