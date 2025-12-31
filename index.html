@@ -802,7 +802,7 @@
                 <div style="padding: 12px; background: #f5f7ff; border-radius: 8px; font-size: 13px; color: #666;">
                     <p style="margin-bottom: 8px;"><strong>GoutteÀGoutte</strong></p>
                     <p style="margin-bottom: 8px;">Protocole Picolite pour gastro-entérite</p>
-                    <p style="margin-bottom: 8px;">Version 1.0</p>
+                    <p style="margin-bottom: 8px;">Version <strong>1.1</strong> (bugfix timer)</p>
                     <p style="margin: 0; font-size: 11px; opacity: 0.8;">Toutes les données restent sur votre appareil</p>
                 </div>
             </div>
@@ -2103,8 +2103,8 @@
                 phase2DeltaElement.style.color = '#ff6b6b';
             }
             
-            // Update global theoretical display
-            document.getElementById('globalTheoretical').textContent = theoreticalAmount + ' ml';
+            // Update global theoretical display - ALWAYS show the 24h total objective
+            document.getElementById('globalTheoretical').textContent = state.totalVolume24h + ' ml';
             
             // Update global delta display with color
             const deltaElement = document.getElementById('globalDelta');

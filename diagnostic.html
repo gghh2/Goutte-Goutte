@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnostic GoutteÀGoutte</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid;
+        }
+        .ok {
+            background: #d3f9d8;
+            border-color: #37b24d;
+            color: #2b8a3e;
+        }
+        .warning {
+            background: #fff3bf;
+            border-color: #fab005;
+            color: #e67700;
+        }
+        .error {
+            background: #ffe3e3;
+            border-color: #ff6b6b;
+            color: #c92a2a;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #5a67d8;
+        }
+        code {
+            background: #f1f3f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .version {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnostic GoutteÀGoutte</h1>
+        <p>Cette page vérifie quelle version de l'application est chargée.</p>
+        
+        <div class="version">
+            Version: <span id="version">v1.1</span>
+        </div>
+        
+        <div id="results"></div>
+        
+        <h3>Actions de dépannage</h3>
+        <button onclick="unregisterServiceWorker()">🗑️ Désinstaller Service Worker</button>
+        <button onclick="clearAllCache()">🧹 Vider tout le cache</button>
+        <button onclick="clearLocalStorage()">💾 Vider localStorage</button>
+        <button onclick="runDiagnostic()">🔄 Re-tester</button>
+    </div>
+
+    <script>
+        const APP_VERSION = 'v1.1-bugfix';
+        const CACHE_VERSION = 'goutteagoutte-v3';
+        
+        function addResult(message, type = 'ok') {
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            document.getElementById('results').appendChild(div);
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+        
+        async function runDiagnostic() {
+            clearResults();
+            
+            // Check Service Worker
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                if (registrations.length > 0) {
+                    addResult(`✅ Service Worker trouvé: ${registrations.length} enregistrement(s)`, 'ok');
+                    registrations.forEach(reg => {
+                        addResult(`SW actif: ${reg.active ? '✅ Oui' : '❌ Non'}<br>Scope: <code>${reg.scope}</code>`, 'ok');
+                    });
+                } else {
+                    addResult('⚠️ Aucun Service Worker trouvé', 'warning');
+                }
+            } else {
+                addResult('❌ Service Worker non supporté', 'error');
+            }
+            
+            // Check Cache API
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                addResult(`📦 Caches trouvés: ${cacheNames.length}`, cacheNames.length > 0 ? 'ok' : 'warning');
+                cacheNames.forEach(name => {
+                    const isCurrent = name === CACHE_VERSION;
+                    addResult(`Cache: <code>${name}</code> ${isCurrent ? '✅ (Actuel)' : '⚠️ (Ancien)'}`, isCurrent ? 'ok' : 'warning');
+                });
+                
+                // Check if old caches exist
+                const oldCaches = cacheNames.filter(name => !name.includes('goutteagoutte-v3'));
+                if (oldCaches.length > 0) {
+                    addResult(`⚠️ ${oldCaches.length} ancien(s) cache(s) détecté(s) - SUPPRIMER`, 'error');
+                }
+            }
+            
+            // Check localStorage
+            const hasData = localStorage.getItem('rehydratationData') !== null;
+            addResult(`💾 Données localStorage: ${hasData ? '✅ Présentes' : '❌ Absentes'}`, hasData ? 'ok' : 'warning');
+            
+            // Check manifest
+            const manifestLink = document.querySelector('link[rel="manifest"]');
+            if (manifestLink) {
+                try {
+                    const response = await fetch(manifestLink.href);
+                    if (response.ok) {
+                        addResult('✅ manifest.json accessible', 'ok');
+                    } else {
+                        addResult(`❌ manifest.json erreur ${response.status}`, 'error');
+                    }
+                } catch (e) {
+                    addResult(`❌ manifest.json inaccessible: ${e.message}`, 'error');
+                }
+            }
+            
+            // Check version
+            addResult(`📱 Version app: <code>${APP_VERSION}</code>`, 'ok');
+            addResult(`🔢 User Agent: <code>${navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}</code>`, 'ok');
+            
+            // Check timer function exists
+            const hasStartTimer = typeof window.startTimer === 'function';
+            addResult(`⏱️ Fonction startTimer: ${hasStartTimer ? '✅ Existe' : '❌ Manquante'}`, hasStartTimer ? 'ok' : 'error');
+        }
+        
+        async function unregisterServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                const registrations = await navigator.serviceWorker.getRegistrations();
+                for (let registration of registrations) {
+                    await registration.unregister();
+                }
+                alert('✅ Service Worker désinstallé.\n\nActualisez la page (F5).');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        }
+        
+        async function clearAllCache() {
+            if ('caches' in window) {
+                const cacheNames = await caches.keys();
+                for (let name of cacheNames) {
+                    await caches.delete(name);
+                }
+                alert('✅ Tous les caches supprimés.\n\nActualisez la page (F5).');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        }
+        
+        function clearLocalStorage() {
+            if (confirm('⚠️ Supprimer toutes les données ?\n\nCela effacera votre historique de prises.')) {
+                localStorage.clear();
+                alert('✅ localStorage vidé.\n\nActualisez la page (F5).');
+                setTimeout(() => window.location.reload(), 1000);
+            }
+        }
+        
+        // Run diagnostic on load
+        runDiagnostic();
+    </script>
+</body>
+</html>
